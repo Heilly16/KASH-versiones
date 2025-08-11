@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Registrar usuario</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/registrar.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <img src="../img/logoKash.png" alt="Logo Kash">
+                <h1>KASH</h1>
+            </div>
+        </header>
+
+        <form id="myForm" th:action="@{/guardarUsuario}" th:object="${nuevoUsuario}" method="POST">
+            <div th:if="${error}" class="error-message">
+                <p th:text="${error}"></p>
+            </div>
+            <div th:if="${success}" class="success-message">
+                <p th:text="${success}"></p>
+            </div>
+            <h4>DATOS PERSONALES</h4>
+
+            <label>
+                <p>Rol:</p>
+                <select th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" id="rolSeleccionado" th:field="*{rolSeleccionado}">
+                    <option value="">Seleccionar rol</option>
+                    <option value="asesor">Asesor</option>
+                    <option value="aprendiz">Aprendiz</option>
+                </select>
+            </label>
+
+            <label>
+                <p>Nombre completo:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{nombres}">
+            </label>
+
+            <label>
+                <p>Primer apellido:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{primerA}">
+            </label>
+
+            <label>
+                <p>Segundo apellido:</p>
+                <input class="Pregunta" type="text" th:field="*{segundoA}" >
+            </label>
+
+            <label>
+                <p>Fecha de nacimiento:</p>
+                <input class="Pregunta"
+                       th:classappend="${errorNacimiento} ? ' input-error' : ''"
+                       type="date" th:field="*{fNacimiento}">
+                <p class="error" th:if="${errorNacimiento}" style="color: red;">Debe ingresar una fecha de nacimiento.</p>
+                <p class="error" th:if="${edad14}" th:text="${edad14}" style="color:red;" ></p>
+                <p class="error" th:if="${fechaVacia}" th:text="${fechaVacia}" style="color:red;"></p>
+                <p class="error" th:if="${fechaInvalida}" th:text="${fechaInvalida}" style="color:red;"></p>
+
+            </label>
+
+
+            <label>
+                <p>Tipo de documento:</p>
+                <select th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" th:field="*{tDocumento}">
+                    <option value="">Seleccionar tipo de documento</option>
+                    <option value="Cédula extranjera">Cédula extranjera</option>
+                    <option value="Cédula de ciudadanía">Cédula de ciudadanía</option>
+                    <option value="Tarjeta de identidad">Tarjeta de identidad</option>
+                </select>
+                <p class="error" th:if="${tipoDocumento}" th:text="${tipoDocumento}" style="color:red;"></p>
+            </label>
+
+            <label>
+                <p>Número del documento:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{idUsuario}" min="0" >
+                <p class="error" th:if="${NumDocumento}" th:text="${NumDocumento}" style="color:red;" ></p>
+            </label>
+
+            <label>
+                <p>Etapa:</p>
+                <select class="Pregunta" th:field="*{etapa}">
+                    <option value="">Seleccionar etapa</option>
+                    <option value="etapa lectiva">Etapa lectiva</option>
+                    <option value="etapa productiva">Etapa productiva</option>
+                </select>
+            </label>
+
+            <label>
+                <p>Trimestre al que pertenece:</p>
+                <select th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" th:field="*{trimestre}" >
+                    <option value="">Seleccionar trimestre</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="N/A">N/A</option>
+                </select>
+            </label>
+
+            <label>
+                <p>Programa:</p>
+                <select th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" th:field="*{programa}" required>
+                    <option value="">Seleccionar programa</option>
+                    <option th:each="prog : ${programas}" th:value="${prog}" th:text="${prog}"></option>
+                </select>
+            </label>
+
+            <h4>DATOS DE CONTACTO</h4>
+
+            <label>
+                <p>Correo electrónico:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="email" th:field="*{correo}" id="correo" >
+                <p class="error" th:if="${correo}" th:text="${correo}" style="color:red;" ></p>
+                <p class="error" th:if="${formato}" th:text="${formato}" style="color:red;" ></p>
+            </label>
+
+            <label>
+                <p>Confirmar correo:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="email" id="confirmar_correo" >
+            </label>
+
+            <label>
+                <p>Número de contacto:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="number" th:field="*{numero}" min="0">
+                <p class="error" th:if="${contacto}" th:text="${contacto}" style="color:red;" ></p>
+            </label>
+
+            <h4>CREAR CUENTA</h4>
+
+            <label>
+                <p>Usuario:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{usuario}">
+                <p class="error" th:if="${usuario}" th:text="${usuario}" style="color:red;"></p>
+            </label>
+
+            <label>
+                <p>Contraseña:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="password" th:field="*{pass}" id="contraseña">
+                <p class="error" th:if="${contraseña}" th:text="${contraseña}" style="color:red;" ></p>
+            </label>
+
+            <label>
+                <p>Confirmar contraseña:</p>
+                <input class="Pregunta" type="password" id="Confirmar_contraseña">
+            </label>
+
+            <button type="submit" class="boton">Registrar</button>
+            <p class="centrado"><a th:href="@{/index}">¿Ya tengo cuenta?</a></p>
+        </form>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let form = document.getElementById("myForm");
+
+                form.addEventListener("submit", function (event) {
+                    let valid = true;
+
+                    // Validación de campos vacíos
+                    let inputs = form.querySelectorAll("input[required], select[required]");
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            input.style.border = "2px solid red";
+                            valid = false;
+                        } else {
+                            input.style.border = "";
+                        }
+                    });
+
+                    // Validación de correo
+                    let correo = document.getElementById("correo").value;
+                    let confirmarCorreo = document.getElementById("confirmar_correo").value;
+                    if (correo !== confirmarCorreo) {
+                        alert("Los correos no coinciden.");
+                        document.getElementById("confirmar_correo").style.border = "2px solid red";
+                        valid = false;
+                    }
+
+                    // Validación de contraseña
+                    let pass = document.getElementById("contraseña").value;
+                    let confirmPass = document.getElementById("Confirmar_contraseña").value;
+                    if (pass !== confirmPass) {
+                        alert("Las contraseñas no coinciden.");
+                        document.getElementById("Confirmar_contraseña").style.border = "2px solid red";
+                        valid = false;
+                    }
+
+                    if (!valid) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const etapaSelect = document.querySelector('[name="etapa"]');
+                const trimestreSelect = document.querySelector('[name="trimestre"]');
+                const opcionNA = Array.from(trimestreSelect.options).find(option => option.value === "N/A");
+
+                // Función para actualizar el estado del trimestre
+                function actualizarTrimestre() {
+                    if (etapaSelect.value === "etapa productiva") {
+                        // Para etapa productiva, seleccionar N/A y deshabilitar
+                        trimestreSelect.value = "N/A";
+                        trimestreSelect.disabled = true;
+                        // Asegurar que la opción N/A esté visible
+                        opcionNA.hidden = false;
+                    } else if (etapaSelect.value === "etapa lectiva") {
+                        // Para etapa lectiva, habilitar y ocultar la opción N/A
+                        trimestreSelect.disabled = false;
+                        opcionNA.hidden = true;
+                        // Si tenía N/A seleccionado, cambiarlo
+                        if (trimestreSelect.value === "N/A") {
+                            trimestreSelect.value = "1";
+                        }
+                    } else {
+                        // Para otros casos o sin selección
+                        trimestreSelect.disabled = false;
+                        opcionNA.hidden = false;
+                    }
+                }
+
+                // Inicializar el estado
+                actualizarTrimestre();
+
+                // Actualizar cuando cambie la etapa
+                etapaSelect.addEventListener("change", actualizarTrimestre);
+                
+                // Validar antes de enviar el formulario
+                document.getElementById("myForm").addEventListener("submit", function(event) {
+                    if (etapaSelect.value === "etapa lectiva" && trimestreSelect.value === "N/A") {
+                        alert("Si estás en etapa lectiva, debes seleccionar un trimestre válido.");
+                        event.preventDefault();
+                    }
+                    
+                    // Asegurar que el campo trimestre esté habilitado para enviar su valor
+                    if (trimestreSelect.disabled) {
+                        trimestreSelect.disabled = false;
+                    }
+                });
+            });
+        </script>
+
+    </body>
+</html>

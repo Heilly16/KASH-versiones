@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>COORDINADOR PQRS</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/PQRS.css"></link>
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection active">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+    </div>
+    <div class="cuerpo">
+        <header>
+            <div class="header-izquierda">
+                <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                <h1>KASH</h1>
+            </div>
+
+            <h2>REVISAR PQRS</h2>
+
+            <div class="perfil-header">
+                <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                <div>
+                    <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                </div>
+            </div>
+        </header>
+
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                <div class="Datos">
+                    <div class="columna-izquierda">
+                        <form th:action="@{/coordinador/subirFoto}" method="POST" enctype="multipart/form-data">
+                            <div class="Foto">
+                                <img th:src="@{|/fotoCoordinador/${coordinador.idUsuario}|}" alt="Foto de perfil" />
+                            </div>
+                            <input type="file" name="foto" accept="image/*" required>
+                            <button type="submit">Subir Foto</button>
+                        </form>
+                    </div>
+
+                    <div class="columna-derecha Datos2">
+                        <p><strong>Usuario:</strong> <span th:text="${coordinador.usuario}"></span></p>
+                        <p><strong>Nombre:</strong> <span th:text="${coordinador.nombres} + ' ' + ${coordinador.primerA} + ' ' + ${coordinador.segundoA}"></span></p>
+                        <p><strong>Tipo de documento:</strong> <span th:text="${coordinador.tDocumento}"></span></p>
+                        <p><strong>Número de documento:</strong> <span th:text="${coordinador.idUsuario}"></span></p>
+                        <p><strong>Rol:</strong> <span th:text="${coordinador.rolSeleccionado}"></span></p>
+                        <p><strong>Trimestre:</strong> <span th:text="${coordinador.trimestre}"></span></p>
+                        <p><strong>Correo:</strong> <span th:text="${coordinador.correo}"></span></p>
+                        <p><strong>Número de contacto:</strong> <span th:text="${coordinador.numero}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="PQRS">
+            <h2 class="titulo">Lista de PQRS</h2>
+
+            <!-- Filtros -->
+            <div class="filtros-container">
+                <form th:action="@{/coordinador/buscarPQRS}" method="get" class="filtros-form">
+                    <div class="filtros-grupo">
+                        <div class="filtro">
+                            <label for="filtro">Buscar:</label>
+                            <input type="text" id="filtro" name="filtro" placeholder="Buscar por cualquier campo..." th:value="${filtro}" class="filtro-input">
+                        </div>
+                        <div class="filtro">
+                            <label for="tipo">Tipo:</label>
+                            <select id="tipo" name="tipo" class="filtro-select">
+                                <option value="todos" th:selected="${tipo == null || tipo == 'todos'}">Todos</option>
+                                <option value="Petición" th:selected="${tipo == 'Petición'}">Petición</option>
+                                <option value="Queja" th:selected="${tipo == 'Queja'}">Queja</option>
+                                <option value="Reclamo" th:selected="${tipo == 'Reclamo'}">Reclamo</option>
+                                <option value="Sugerencia" th:selected="${tipo == 'Sugerencia'}">Sugerencia</option>
+                            </select>
+                        </div>
+                        <div class="filtro">
+                            <label for="estado">Estado:</label>
+                            <select id="estado" name="estado" class="filtro-select">
+                                <option value="todos" th:selected="${estado == null || estado == 'todos'}">Todos</option>
+                                <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
+                                <option value="RESPONDIDO" th:selected="${estado == 'RESPONDIDO'}">Respondido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filtros-botones">
+                        <button type="submit" class="btn-filtrar">
+                            <i class="fas fa-filter"></i> Aplicar filtros
+                        </button>
+                        <button type="button" onclick="limpiarFiltros()" class="btn-limpiar">
+                            <i class="fas fa-broom"></i> Limpiar filtros
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Botones de reportes -->
+            <div class="reportes-container">
+                <button class="btn-generar-reporte" onclick="abrirModalReporte()">
+                    <i class="fas fa-file-pdf"></i> Generar reporte personalizado
+                </button>
+                <a th:href="@{/reporte/coordinador/generar-reporte-pqrs}" class="btn-generar-reporte" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Generar reporte PDF
+                </a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Asunto</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="pqrs : ${pqrsList}">
+                        <td th:text="${pqrs.id}"></td>
+                        <td th:text="${pqrs.nombre}"></td>
+                        <td th:text="${pqrs.email}"></td>
+                        <td th:text="${pqrs.fecha}"></td>
+                        <td th:text="${pqrs.tipo}"></td>
+                        <td th:text="${pqrs.detalles}"></td>
+                        <td th:text="${pqrs.estado}"></td>
+                        <td>
+                            <div class="btn-action">
+                                <button type="button" class="btn-responder"
+                                        th:data-id="${pqrs.id}"
+                                        th:data-nombre="${pqrs.nombre}"
+                                        th:data-email="${pqrs.email}"
+                                        th:data-detalles="${pqrs.detalles}"
+                                        onclick="abrirModal(this)">
+                                    Responder
+                                </button>
+
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="modalResponder" class="modal" style="display: none;">
+            <div class="modal-contenido">
+                <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                <h2>Responder PQRS</h2>
+                <form th:action="@{/coordinador/responderPQRS}" method="post">
+                    <input type="hidden" name="id" id="pqrsId">
+                    <p><strong>Nombre:</strong> <span id="modalNombre"></span></p>
+                    <p><strong>Correo:</strong> <span id="modalCorreo"></span></p>
+                    <p><strong>Detalles:</strong> <span id="modalDetalles"></span></p>
+                    <textarea name="respuesta" placeholder="Escribe tu respuesta..." required></textarea>
+                    <button type="submit">Enviar Respuesta</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Gestión de PQRS</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar todas las PQRS (Peticiones, Quejas, Reclamos y Sugerencias) recibidas en el sistema. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Filtros:</strong> Puede buscar PQRS por texto, filtrar por tipo (Petición, Queja, Reclamo, Sugerencia) o por estado (Pendiente, Respondido).</li>
+                    <li><strong>Reportes:</strong> Genere reportes en PDF  con la información de las PQRS.</li>
+                    <li><strong>Responder:</strong> Puede dar respuesta a cada PQRS pendiente, lo que enviará un correo electrónico al usuario y cambiará el estado a "Respondido".</li>
+                </ul>
+                <p>Para obtener más información sobre cada función, pase el cursor sobre los botones o elementos de la interfaz.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <script>
+            function abrirModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "flex";
+            }
+
+            function cerrarModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "none";
+            }
+
+            function abrirModal(boton) {
+                var modal = document.getElementById("modalResponder");
+                document.getElementById("pqrsId").value = boton.getAttribute("data-id");
+                document.getElementById("modalNombre").textContent = boton.getAttribute("data-nombre");
+                document.getElementById("modalCorreo").textContent = boton.getAttribute("data-email");
+                document.getElementById("modalDetalles").textContent = boton.getAttribute("data-detalles");
+                modal.style.display = "block";
+            }
+
+            function cerrarModal() {
+                document.getElementById("modalResponder").style.display = "none";
+            }
+
+            function limpiarFiltros() {
+                document.getElementById("filtro").value = "";
+                document.getElementById("tipo").value = "todos";
+                document.getElementById("estado").value = "todos";
+                window.location.href = "/coordinador/PQRS";
+            }
+
+            // Funciones para el modal de reporte
+            function abrirModalReporte() {
+                document.getElementById('modalReporte').style.display = 'flex';
+            }
+
+            function cerrarModalReporte() {
+                document.getElementById('modalReporte').style.display = 'none';
+            }
+
+            // Cerrar modales al hacer clic fuera de ellos
+            window.onclick = function (event) {
+                var modalResponder = document.getElementById("modalResponder");
+                var modalPerfil = document.getElementById("modalPerfil");
+                var helpModal = document.getElementById("helpModal");
+                var modalReporte = document.getElementById("modalReporte");
+
+                if (event.target == modalResponder) {
+                    modalResponder.style.display = "none";
+                }
+
+                if (event.target == modalPerfil) {
+                    modalPerfil.style.display = "none";
+                }
+
+                if (event.target == helpModal) {
+                    helpModal.style.display = "none";
+                }
+
+                if (event.target == modalReporte) {
+                    modalReporte.style.display = "none";
+                }
+            }
+        </script>
+
+        <script src="../../js/help-modal.js"></script>
+
+        <!-- Modal para reporte personalizado -->
+        <div id="modalReporte" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="cerrar-modal" onclick="cerrarModalReporte()">&times;</span>
+                <h3 class="modal-title"><i class="fas fa-file-pdf"></i> Generar reporte personalizado</h3>
+
+                <form id="formReportePersonalizado" method="post" th:action="@{/reporte/coordinador/generar-reporte-pqrs-personalizado}" target="_blank">
+                    <div class="reporte-section">
+                        <h4>Selecciona los campos a incluir:</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="id" checked> ID</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="nombre" checked> Nombre</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="email" checked> Email</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="tipo" checked> Tipo</label>
+                            </div>
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="estado" checked> Estado</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="detalles" checked> Detalles</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="fecha" checked> Fecha</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reporte-section">
+                        <h4>Formato del reporte:</h4>
+                        <div class="tipo-reporte">
+                            <label class="radio-item"><input type="radio" name="tipo" value="pdf" checked> <i class="fas fa-file-pdf"></i> PDF</label>
+                            <label class="radio-item"><input type="radio" name="tipo" value="excel"> <i class="fas fa-file-excel"></i> Excel</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-generar-reporte">
+                            <i class="fas fa-download"></i> Generar reporte
+                        </button>
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalReporte()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+</body>
+</html>

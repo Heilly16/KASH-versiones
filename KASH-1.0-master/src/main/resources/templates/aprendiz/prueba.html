@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Aprendiz - Pruebas</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/aprendiz/prueba.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+ // Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+ // Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <div class="barra">
+        <div class="selection">
+            <img class="icono" src="../../img/asesoria.png" alt="">
+            <a th:href="@{/aprendiz/grupo}" class="link">Grupos</a>
+        </div>
+        <div class="selection active">
+            <img class="icono" src="../../img/confirmar.png" alt="">
+            <a th:href="@{/aprendiz/asesorias}" class="link">Asesorías</a>
+        </div>
+        <div class="selection">
+            <img class="icono" src="../../img/asistencia.png" alt="">
+            <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
+        </div>
+        <div class="selection">
+            <img class="icono" src="../../img/prueba.png" alt="">
+            <a th:href="@{/aprendiz/prueba}" class="link">Pruebas</a>
+        </div>
+        <div class="cerrar_sesion">
+            <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+        </div>
+    </div>
+    <div class="cuerpo">
+        <header>
+            <div class="header-izquierda">
+                <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                <h1>KASH</h1>
+            </div>
+
+            <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+            <div class="perfil-header">
+                <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                <div>
+                    <span class="rol-usuario">Rol: <span th:text="${aprendiz.rolSeleccionado}"></span></span>
+                </div>
+            </div>
+        </header>
+
+
+        <div id="modalPerfil" class="modal-perfil">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                <div class="Datos">
+                    <div class="columna-izquierda">
+                        <form th:action="@{/aprendiz/subirFoto}" method="POST" enctype="multipart/form-data">
+                            <div class="Foto">
+                                <img th:src="@{/fotoAprendiz/{id}(id=${aprendiz.idUsuario})}" alt="Foto de perfil" />
+                            </div>
+                            <input type="file" name="foto" accept="image/*" required>
+                            <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+                            <button type="submit">Subir Foto</button>
+                        </form>
+                    </div>
+
+                    <div class="columna-derecha Datos2">
+                        <p><strong>Usuario:</strong> <span th:text="${aprendiz.usuario}"></span></p>
+                        <p><strong>Nombre:</strong> <span th:text="${aprendiz.nombres} + ' ' + ${aprendiz.primerA} + ' ' + ${aprendiz.segundoA}"></span></p>
+                        <p><strong>Tipo de documento:</strong> <span th:text="${aprendiz.tDocumento}"></span></p>
+                        <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
+                        <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                        <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
+                        <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
+                        <p><strong>Correo:</strong> <span th:text="${aprendiz.correo}"></span></p>
+                        <p><strong>Número de contacto:</strong> <span th:text="${aprendiz.numero}"></span></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="Grupos">
+            <h2 class="titulo-grupos">Pruebas Asignadas</h2>
+
+            <div th:if="${grupos != null and #lists.size(grupos) > 0}" class="grid-grupos">
+                <div th:each="grupo : ${grupos}" class="card-grupo">
+                    <div class="card-header">
+                        <h3 th:text="${grupo.nombre}">Nombre del grupo</h3>
+                        <span class="estado" th:text="${grupo.estado}">Activo</span>
+                    </div>
+
+                    <div class="card-body">
+                        <p><strong>Asesor:</strong> 
+                            <span th:if="${grupo.asesor != null}" th:text="${grupo.asesor.nombres}">Nombre del asesor</span>
+                            <span th:if="${grupo.asesor == null}">Sin asesor asignado</span>
+                        </p>
+                        <p>
+                            <strong>Cantidad de integrantes:</strong> 
+                            <span th:text="${#lists.size(grupo.aprendices)}">0</span>
+                        </p>
+
+                        <div class="botones-card">
+                            <button class="btn-pruebas" type="button" 
+                                    th:attr="onclick='mostrarModalPruebas(' + ${grupo.id} + ')'">
+                                Pruebas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal de Pruebas por grupo -->
+                    <div th:attr="id='modalPruebas_' + ${grupo.id}" class="modal-pruebas">
+                        <div class="modal-pruebas-contenido">
+                            <span class="cerrar-pruebas" onclick="cerrarTodosModales()">&times;</span>
+                            <h3 th:text="'Pruebas del grupo: ' + ${grupo.nombre}">Pruebas</h3>
+
+                            <div th:each="prueba : ${pruebas}" th:if="${prueba.grupo.id == grupo.id}" class="bloque-prueba">
+                                <div class="encabezado-prueba" th:onclick="'toggleFormularioPrueba(' + ${prueba.id} + ')'">
+                                    <h4 th:text="${prueba.tema}">Nombre de la prueba</h4>
+                                    <span th:if="${resultados[prueba.id] != null}">
+                                        <strong>Respuestas correctas:</strong> <span th:text="${resultados[prueba.id]}"></span>
+
+                                    </span>
+                                    <span th:if="${resultados[prueba.id] == null}">
+                                        <em>No respondida</em>
+                                    </span>
+                                </div>
+
+                                <!-- Formulario que se despliega solo al hacer clic -->
+                                <div th:attr="id='formularioPrueba_' + ${prueba.id}" class="formulario-prueba oculto">
+                                    <form th:action="@{'/resolverPrueba/' + ${prueba.id}}" method="post">
+                                        <div th:each="pregunta : ${prueba.preguntas}" class="pregunta-container">
+                                            <p class="pregunta-texto"><strong th:text="${pregunta.enunciado}"></strong></p>
+                                            <div class="opciones-container">
+                                                <select th:name="'pregunta_' + ${pregunta.id}" 
+                                                        th:id="'select_' + ${pregunta.id}" 
+                                                        class="select-respuesta" 
+                                                        required>
+                                                    <option value="">Selecciona una respuesta</option>
+                                                    <option th:each="respuesta : ${pregunta.respuestas}" 
+                                                            th:value="${respuesta.id}" 
+                                                            th:text="${respuesta.texto}">
+                                                        Respuesta
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn-enviar-prueba">Enviar</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Mensaje cuando no hay pruebas para el grupo -->
+                            <div th:unless="${#lists.size(pruebas.?[grupo.id == __${grupo.id}__]) > 0}" class="sin-pruebas">
+                                <p>No hay pruebas disponibles para este grupo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay grupos -->
+            <div th:unless="${grupos != null and #lists.size(grupos) > 0}" class="sin-grupos">
+                <p>No tienes grupos asignados. Para realizar pruebas, primero debes unirte a un grupo.</p>
+            </div>
+
+            <!-- Mensaje de error o éxito -->
+            <div class="mensajes-container">
+                <div th:if="${error}" class="mensaje-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}">Mensaje de error</span>
+                </div>
+                <div th:if="${mensaje}" class="mensaje-exito">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${mensaje}">Mensaje de éxito</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="../../js/help-modal.js"></script>
+    <script src="../../js/add-help-modal.js"></script>
+    <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    // Configuración del modal de ayuda
+                                    addHelpModal('Ayuda - Pruebas', [
+                                        {title: 'Pruebas disponibles', description: 'Visualice todas las pruebas disponibles para realizar.'},
+                                        {title: 'Realización', description: 'Complete las pruebas asignadas por sus asesores.'},
+                                        {title: 'Resultados', description: 'Consulte sus resultados y calificaciones de pruebas anteriores.'},
+                                        {title: 'Estado', description: 'Verifique el estado de cada prueba (Pendiente/Completada).'}
+                                    ], 'Las pruebas tienen un tiempo límite para completarse. Asegúrese de finalizarlas antes del tiempo establecido.');
+                                });
+
+                                // Función para abrir el modal de perfil
+                                function abrirModalPerfil() {
+                                    document.getElementById('modalPerfil').style.display = 'block';
+                                }
+
+                                // Función para cerrar el modal de perfil
+                                function cerrarModalPerfil() {
+                                    document.getElementById('modalPerfil').style.display = 'none';
+                                }
+
+                                // Función para mostrar el modal de pruebas
+                                function mostrarModalPruebas(grupoId) {
+                                    document.getElementById('modalPruebas_' + grupoId).style.display = 'block';
+                                }
+
+                                // Función para cerrar todos los modales de pruebas
+                                function cerrarTodosModales() {
+                                    var modales = document.querySelectorAll('.modal-pruebas');
+                                    modales.forEach(function (modal) {
+                                        modal.style.display = 'none';
+                                    });
+                                }
+
+                                // Función para mostrar/ocultar el formulario de cada prueba
+                                function toggleFormularioPrueba(pruebaId) {
+                                    var formulario = document.getElementById('formularioPrueba_' + pruebaId);
+                                    if (formulario.classList.contains('oculto')) {
+                                        formulario.classList.remove('oculto');
+                                    } else {
+                                        formulario.classList.add('oculto');
+                                    }
+                                }
+
+                                // Cerrar modal al hacer clic fuera
+                                window.onclick = function (event) {
+                                    var modalPerfil = document.getElementById('modalPerfil');
+                                    if (modalPerfil && event.target === modalPerfil) {
+                                        cerrarModalPerfil();
+                                    }
+
+                                    var modalesPruebas = document.querySelectorAll('.modal-pruebas');
+                                    modalesPruebas.forEach(function (modal) {
+                                        if (event.target === modal) {
+                                            modal.style.display = 'none';
+                                        }
+                                    });
+                                };
+    </script>
+
+</body>
+</html>
+

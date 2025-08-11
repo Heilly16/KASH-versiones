@@ -1,0 +1,411 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    background-color: #03314b;
+    color: white;
+    height: 60px;
+}
+
+header .logo {
+    display: flex;
+    align-items: center;
+}
+
+header .logo img {
+    width: 60px;
+    margin-right: 10px;
+}
+
+.btn-foro {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-foro:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+.btn-registra {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-registra:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+nav {
+    display: flex;
+}
+
+nav li {
+    list-style: none;
+    margin-left: 20px;
+}
+
+nav li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+nav li a:hover {
+    color: #038C3E;
+}
+
+/* Contenedor principal */
+.contenedor {
+    display: flex;
+    flex: 1;
+    background-color: #f4f4f4;
+    justify-content: space-between;
+}
+
+/* Sección de información */
+.info {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: white;
+}
+
+/* Card de información */
+.card {
+    text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card h1 {
+    color: #03314b;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+
+
+/* Formulario */
+.formulario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    transition: transform 0.3s ease-in-out;
+}
+
+.formulario:hover {
+    transform: scale(1.02);
+}
+
+.formulario h2 {
+    color: #03314b;
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Mejoras en los inputs */
+.formulario input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border 0.3s ease-in-out;
+}
+
+.formulario input:focus {
+    border: 2px solid #038C3E;
+    outline: none;
+    box-shadow: 0 0 5px rgba(3, 140, 62, 0.5);
+}
+.formulario label {
+    align-self: flex-start;
+    font-weight: bold;
+    color: #03314b;
+    margin-bottom: 5px;
+}
+/* Ajuste en el botón de ingresar */
+button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    width: 200px;
+    text-align: center;
+    display: inline-block;
+    margin: 10px;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #0056b3, #00408b);
+    transform: scale(1.05);
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: scale(0.98);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Ajuste en el link del formulario */
+.formulario .link {
+    margin-top: 12px;
+    color: #038C3E;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.formulario .link:hover {
+    text-decoration: underline;
+}
+
+/* Ocultar formulario */
+.oculto {
+    display: none;
+}
+
+/* Carrusel */
+.carrusel-card {
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carrusel {
+    width: 90%;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carrusel ul {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    width: 400%;
+    animation: slide 16s infinite ease-in-out;
+}
+
+.carrusel li {
+    list-style: none;
+    width: 100%;
+}
+
+.carrusel img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+@keyframes slide {
+    0%, 20% {
+        margin-left: 0%;
+    }
+    25%, 45% {
+        margin-left: -100%;
+    }
+    50%, 70% {
+        margin-left: -200%;
+    }
+    75%, 95% {
+        margin-left: -300%;
+    }
+    100% {
+        margin-left: 0%;
+    }
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 5px 0;
+    background-color: #03314b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.footer_nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.footer_nav img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin: 0 20px;
+}
+
+/* Ajustes para logos */
+.logo1 {
+    width: 150px !important;
+    height: 40px !important;
+    margin-right: 500px;
+}
+
+.logo2 {
+    width: 110px !important;
+    height: 50px !important;
+    margin-right: 500px;
+}
+
+.logo3 {
+    width: 90px !important;
+    height: 50px !important;
+}
+
+/* Estilo para la "X" en el formulario */
+.cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #03314b;
+}
+
+.cerrar:hover {
+    color: #038C3E;
+}
+
+/* Estilos para el campo de contraseña con ícono */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container input {
+    width: 100%;
+    padding-right: 30px;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+/* Mensaje de error */
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Contenedor principal del flip-card */
+.flip-card {
+    background-color: transparent;
+    width: 100%;
+    height: 300px;
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+/* Lado frontal y trasero */
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.flip-card-front {
+    background-color: white;
+}
+
+.flip-card-back {
+    background-color: #f4f4f4;
+    transform: rotateY(180deg);
+}
+
+/* Agregamos la clase para activar la rotación */
+.rotar {
+    transform: rotateY(180deg);
+}
+.error-msg {
+    color: red;
+    font-weight: bold;
+    display: block;
+}
+
+

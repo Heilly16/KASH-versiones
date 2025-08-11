@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Foro</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/foro.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo-container">
+                <img class="logo" src="../img/logoKash.png" alt="Logo de KASH">
+                <h2>KASH</h2>
+            </div>
+            <h1>Foro</h1>
+            <a th:href="@{/index}" class="btn-login">Iniciar sesión</a>
+        </header>
+
+        <!-- Aquí agregamos el contenedor para los foros -->
+        <section id="foros">
+            <div class="foro-lista" th:each="f : ${foro}">
+                <div class="foro-item">
+                    <div class="card">
+                        <div class="card-header">
+                            <img class="card-img" th:src="@{'/foro/imagen/' + ${f.id}}" alt="Imagen del Foro">
+                            <h3 th:text="${f.tema}">Título del Foro</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="author"><strong>Creado por:</strong> <span th:text="${f.nombre}">Nombre del Creador</span></p>
+                            <p class="date"><strong>Fecha de creación:</strong> <span th:text="${f.fecha}">Fecha del Foro</span></p>
+                            <div class="foro-contenido" style="display: none;" th:text="${f.contenido}"></div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn-comentar"
+                                    th:data-id-foro="${f.id}"
+                                    th:data-tema="${f.tema}"
+                                    th:data-nombre="${f.nombre}"
+                                    th:data-fecha="${f.fecha}"
+                                    th:data-contenido="${f.contenido}"
+                                    th:data-imagen="@{'/foro/imagen/' + ${f.id}}"
+                                    onclick="abrirForo(this)">Abrir Foro</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Modal para mostrar detalles del foro -->
+        <div id="modalForo" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="cerrarModal()">&times;</span>
+                <img id="modalImagen" class="modal-img" src="" alt="Imagen del Foro">
+                <h3 id="modalTema">Título del Foro</h3>
+                <p id="modalAutor"><strong>Creado por:</strong> <span id="modalNombre"></span></p>
+                <p id="modalFecha"><strong>Fecha de creación:</strong> <span id="modalFechaCreacion"></span></p>
+                <p id="modalContenido">Contenido del foro...</p>
+
+                <div id="comentariosZona">
+                    <h4>Comentarios</h4>
+                    <div th:each="comentario : ${comentarios}">
+                        <p><strong th:text="${comentario.nombre}">Usuario</strong>: <span th:text="${comentario.contenido}">Comentario</span></p>
+                    </div>
+                </div>
+                <form th:action="@{/foro/comentarios/agregar}" method="POST" class="form-comentar">
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" class="input-comentar">
+                    <input type="text" id="contenido" name="contenido" placeholder="Escribe tu comentario..." class="input-comentar">
+                    <input type="hidden" id="foroId" name="foroId" value="ID_DEL_FORO_AQUÍ">
+                    <button class="BotonComentar">Comentar</button>
+                </form>
+            </div>
+        </div>
+
+
+
+
+
+
+        <button class="btn-flotante" id="btnPQR" aria-label="Registrar PQRS">
+            <img src="../img/pqrs.png" alt="Icono PQR">
+        </button>
+        <button class="btn-flotante2" id="Forobtn" aria-label="Crear Foro">
+            <img src="../img/Crear-foro.png" alt="Crear Foro">
+        </button>
+
+        <!-- Formulario PQR -->
+        <div class="formulario-pqr" id="formPQR" role="dialog" aria-labelledby="pqrHeader" aria-hidden="true">
+            <div class="formulario-pqr-header">
+                <img src="../img/pqrs.png" alt="Icono PQR">
+                <h4 id="pqrHeader">Registrar PQRS</h4>
+
+            </div>
+
+            <form th:action="@{/enviarPQRS}" method="post">
+
+                <label for="nombre">Nombre de usuario:</label>
+                <input type="text" id="nombre" name="nombres" required>
+
+                <label for="idUsuario">Número de documento:</label>
+                <input type="text" id="idUsuario" name="idUsuario" required>
+
+                <label for="correo">Email:</label>
+                <input type="email" id="correo" name="correo" required>
+
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" readonly>
+
+
+
+                <label for="tipo">Tipo:</label>
+                <input type="text" id="tDocumento" name="tipo" list="list" required>
+                <datalist id="list">
+                    <option value="Petición"></option>
+                    <option value="Queja"></option>
+                    <option value="Reclamo"></option>
+                    <option value="Otra"></option>
+                </datalist>
+
+                <label for="detalles">Detalles:</label>
+                <textarea id="detalles" name="detalles" rows="4" required></textarea>
+
+                <div class="button-container">
+                    <button type="submit">Enviar</button>
+
+                    <button type="button" id="cerrarPQR">Cerrar</button>
+                </div>
+            </form>
+        </div>
+
+
+        <!-- Modal de Login -->
+        <div id="loginModalUnique" class="modal" role="dialog" aria-labelledby="loginHeader" aria-hidden="true">
+            <div class="modal-content">
+                <span class="close" id="closeLoginModal" aria-label="Cerrar modal">&times;</span>
+                <h2 id="loginHeader">Inicia sesión para crear un foro</h2>
+                <form th:action="@{/ingresar/foro}" method="GET" class="formulario">
+                    <p id="error-message" style="display: none;">${error}</p>
+                    <h4>Usuario: </h4>
+                    <input type="text" id="usuario" name="usuario" placeholder="Ingrese el usuario"><br>
+                    <h4>Contraseña: </h4>
+                    <input type="password" id="pass" name="pass" placeholder="Ingrese la contraseña"><br>
+                    <div class="enlaces">
+                        <button class="boton" type="submit">Ingresar</button>
+                        <a href="#">Olvidé mi contraseña</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <main>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // PQRS formulario
+                    const btnPQR = document.getElementById("btnPQR");
+                    const formPQR = document.getElementById("formPQR");
+                    const cerrarPQR = document.getElementById("cerrarPQR");
+
+                    // Verificar que los elementos necesarios estén presentes
+                    if (!btnPQR || !formPQR || !cerrarPQR) {
+                        console.error("Error: No se encontraron elementos necesarios.");
+                        return;
+                    }
+
+                    // Asegurar que el formulario esté oculto al inicio
+                    formPQR.style.display = "none";
+
+                    // Mostrar formulario solo al hacer clic en el botón
+                    btnPQR.addEventListener("click", function () {
+                        console.log("Abriendo formulario");
+                        formPQR.style.display = "flex";  // Mostrar el formulario
+                    });
+
+                    // Cerrar formulario al hacer clic en el botón "cerrarPQR"
+                    cerrarPQR.addEventListener("click", function () {
+                        console.log("Cerrando formulario");
+                        formPQR.style.display = "none";  // Ocultar el formulario
+                    });
+
+                    // También cerrar si se hace clic fuera del formulario
+                    formPQR.addEventListener("click", function (event) {
+                        if (event.target === formPQR) {
+                            console.log("Cerrando formulario desde fuera");
+                            formPQR.style.display = "none";  // Ocultar el formulario
+                        }
+                    });
+
+                    // Establecer la fecha de hoy en el campo de fecha
+                    const fechaInput = document.getElementById("fecha");
+                    if (fechaInput) {
+                        const hoy = new Date();
+                        const fechaFormateada = hoy.toISOString().split('T')[0];  // Formatear la fecha como YYYY-MM-DD
+                        console.log("Fecha asignada:", fechaFormateada);
+                        fechaInput.value = fechaFormateada;
+                    }
+
+                });
+
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const mensajeExito = "[[${mensajeExito}]]";
+                    const mensajeError = "[[${mensajeError}]]";
+
+
+                    if (mensajeExito && mensajeExito !== "null" && mensajeExito !== "") {
+                        alert(mensajeExito);
+                    } else if (mensajeError && mensajeError !== "null" && mensajeError !== "") {
+                        alert(mensajeError);
+                    }
+                });
+            </script>
+
+            <script>
+                function abrirForo(button) {
+                    // Obtener datos del botón clickeado
+                    var foroId = button.getAttribute('data-id-foro');
+                    var tema = button.getAttribute('data-tema');
+                    var nombre = button.getAttribute('data-nombre');
+                    var fecha = button.getAttribute('data-fecha');
+                    var contenido = button.getAttribute('data-contenido');
+                    var imagen = button.getAttribute('data-imagen');
+
+                    // Actualizar el modal con la información del foro seleccionado
+                    document.getElementById('modalImagen').src = imagen;
+                    document.getElementById('modalTema').textContent = tema;
+                    document.getElementById('modalNombre').textContent = nombre;
+                    document.getElementById('modalFechaCreacion').textContent = fecha;
+                    document.getElementById('modalContenido').textContent = contenido;
+
+                    // Establecer el foroId en el campo oculto del formulario
+                    document.getElementById('foroId').value = foroId;
+
+                    // Mostrar el modal
+                    document.getElementById('modalForo').style.display = 'block';
+
+                    // Limpiar la zona de comentarios antes de cargar los nuevos
+                    const comentariosZona = document.getElementById('comentariosZona');
+                    comentariosZona.innerHTML = '<h4>Comentarios</h4>';  // Restablecer el título de los comentarios
+
+                    // Obtener los comentarios del servidor para ese foro específico
+                    fetch(`/foro/comentarios/${foroId}`)
+                            .then(response => response.json())
+                            .then(comentarios => {
+                                // Agregar los comentarios al modal
+                                comentarios.forEach(comentario => {
+                                    comentariosZona.innerHTML += `
+                    <p><strong>${comentario.nombre}</strong>: ${comentario.contenido}</p>
+                `;
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error al cargar los comentarios:', error);
+                                comentariosZona.innerHTML += '<p>Error al cargar los comentarios.</p>';
+                            });
+                }
+
+                function cerrarModal() {
+                    // Ocultar el modal
+                    document.getElementById('modalForo').style.display = 'none';
+                }
+
+            </script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Modal de Login
+                    const modalLogin = document.getElementById("loginModalUnique"); // Ahora tiene un ID único
+                    const btnCrearForo = document.getElementById("Forobtn");
+                    const closeLogin = document.getElementById("closeLoginModal");
+
+                    modalLogin.style.display = "none"; // Ocultar modal al cargar la página
+
+                    btnCrearForo.onclick = function () {
+                        modalLogin.style.display = "flex";
+                    };
+
+                    closeLogin.onclick = function () {
+                        modalLogin.style.display = "none";
+                    };
+
+                    window.onclick = function (event) {
+                        if (event.target === modalLogin) {
+                            modalLogin.style.display = "none";
+                        }
+                    };
+                });
+
+            </script>
+            <script th:if="${error}">
+                alert("[[${error}]]");
+            </script>
+        </main>
+    </body>
+</html>

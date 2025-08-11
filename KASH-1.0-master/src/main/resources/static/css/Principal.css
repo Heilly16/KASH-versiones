@@ -1,0 +1,181 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+}
+body{
+    margin: 0px;
+    padding: 0px;
+    border: 10px;
+    background-color:#e7ebe6;
+    position:static;
+    font-family: 'Nunito', sans-serif;
+}
+header{
+    background-color: rgb(4,50,77);
+    width: 100%;
+    height: 70px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center ;
+}
+header nav{
+    justify-content: flex-end;
+    display: flex;
+}
+.logo{
+    display: flex;
+}
+header img{
+    width: 50px;
+}
+header  h1{
+    justify-content: flex-end;
+    display:flex;
+    align-items: center;
+    top: 0;
+    text-align: center;
+    color: white;
+}
+header li{
+    justify-content: center; 
+    list-style: none;
+    width: 250px;
+    display:flex;
+    align-items: center;
+}
+header a{
+    text-decoration: none;
+    color: white    ;
+    position: relative;
+}
+
+.foro{
+    width: 50%;
+    height: 100vh;
+}
+#division{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.Contenido{
+    width: 75%;
+    height: 500px;
+    display: flex;
+    max-width: 1100px; 
+    margin: 20px; 
+}
+.card{
+    width: 100%;
+    margin: 20px auto;
+    border-radius: 100px;
+    overflow: hidden;
+    background: #e8f8d4;
+    box-shadow: 0px 1px 10px rgba(0,0,0,0.2);
+    cursor: default;
+    transition: all 400ms ease;
+    align-items: center;
+    justify-content: space-betweens;
+    text-align: center;
+    position: relative;
+}
+.card:hover{
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.4);
+    transform: translateY(-3%);
+    align-items: center;
+    justify-content: center;
+}
+.card .text{
+    text-align: justify;
+    margin: 5px 40px 0 40px;
+}
+.card img{
+    max-width: 100%;
+    height: auto;
+    margin-top: 20px;
+}
+.card h3{
+    margin-top: 10px;
+    font-family: 'Nunito', sans-serif;
+}
+.card h4{
+    margin-top: 10px;
+    font-family: 'Nunito', sans-serif;
+}
+.card p{
+    padding: auto;
+    margin-top: 15px;
+    justify-content: center;
+    line-height: 1.5;
+}
+.card text{
+    text-align: justify;
+    justify-content:center;
+}
+.card a{
+    width: 100px;
+    padding: 10px;
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    background-color: rgb(24, 160, 12);
+    color: #f4f4f4;
+    font-weight: 700px;
+    border-radius: 10px;
+    text-decoration: none;
+    
+}
+.card a:hover{
+    background-color:  rgb(11, 63, 6);
+}
+.link{
+    width: 100%;
+    height: 10px;
+    margin-top: 110px;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    position: relative;
+}
+.link2{
+    width: 100%;
+    height: 10px;
+    margin-top: 30px;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    position: relative;
+}
+footer{
+    width: 100%;
+    height: 60px;
+    position: absolute;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    font-size: 13px;
+    background-color: rgb(4,50,77);
+    border-top: 1px solid #d3cfcf;
+    margin-top: auto;
+}
+
+.logo1{
+        width: 150px;
+        height: 40px;
+        margin-right: 500px;
+}
+.logo2{
+    width: 110px;
+    height: 50px;
+    margin-right: 500px;
+}
+.logo3{
+    width: 90px;
+    height: 50px;
+}
+.footer_nav{
+    display: flex;
+    position: relative;
+}

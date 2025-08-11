@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Coordinador - Editar Usuario</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/editar.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>EDITAR USUARIO</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Modal Perfil -->
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/coordinador/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{|/fotoCoordinador/${coordinador.idUsuario}|}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${coordinador.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${coordinador.nombres} + ' ' + ${coordinador.primerA} + ' ' + ${coordinador.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${coordinador.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${coordinador.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${coordinador.rolSeleccionado}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${coordinador.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${coordinador.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${coordinador.numero}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <h2>Editar Usuario</h2>
+                <form th:action="@{/coordinador/editar}"  th:object="${usuarioParaActualizar}" method="post">
+
+                    <label for="idUsuario">Número de documento:</label>
+                    <input type="text" id="idUsuario" name="idUsuario" th:value="${usuarios.idUsuario}" readonly/>
+
+                    <label for="numero">Número:</label>
+                    <input type="text" id="numero" name="numero" th:value="${usuarios.numero}"   required/>
+
+                    <label for="fNacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" id="fNacimiento" name="fNacimiento" th:value="${usuarios.fNacimiento}" required/>
+
+                    <label for="tDocumento">Tipo de Documento:</label>
+                    <select id="tDocumento" name="tDocumento" required>
+                        <option value="Cédula de Ciudadanía" th:selected="${usuarios.tDocumento == 'CC'}" >Cédula de Ciudadanía</option>
+                        <option value="Tarjeta de Identidad" th:selected="${usuarios.tDocumento == 'TI'}" >Tarjeta de Identidad</option>
+                        <option value="Cédula de Extranjería" th:selected="${usuarios.tDocumento == 'CE'}" >Cédula de Extranjería</option>
+                    </select>
+
+                    <label for="nombres">Nombre:</label>
+                    <input type="text" id="nombres" name="nombres" th:value="${usuarios.nombres}"  required/>
+
+                    <label for="primerA">Primer Apellido:</label>
+                    <input type="text" id="primerA" name="primerA" th:value="${usuarios.primerA}" required/>
+
+                    <label for="segundoA">Segundo Apellido:</label>
+                    <input type="text" id="segundoA" name="segundoA" th:value="${usuarios.segundoA}" />
+
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" th:value="${usuarios.correo}" required/>
+
+                    <label for="usuario">Usuario:</label>
+                    <input type="text" id="usuario" name="usuario" th:value="${usuarios.usuario}"  required/>
+
+                    <label for="rolSeleccionado">Rol:</label>
+                    <select id="rolSeleccionado" name="rolSeleccionado" required>
+                        <option value="asesor" th:selected="${usuarios.rolSeleccionado == 'asesor'}" >Asesor</option>
+                        <option value="aprendiz" th:selected="${usuarios.rolSeleccionado == 'aprendiz'}">Aprendiz</option>
+                    </select>
+
+                    <label for="trimestre">Trimestre:</label>
+                    <select id="trimestre" name="trimestre" required>
+                        <option value="1" th:selected="${usuarios.trimestre == '1'}" >Primer Trimestre</option>
+                        <option value="2" th:selected="${usuarios.trimestre == '2'}" >Segundo Trimestre</option>
+                        <option value="3" th:selected="${usuarios.trimestre == '3'}" >Tercer Trimestre</option>
+                        <option value="4" th:selected="${usuarios.trimestre == '4'}" >Cuarto Trimestre</option>
+                        <option value="5" th:selected="${usuarios.trimestre == '5'}" >Quinto Trimestre</option>
+                        <option value="6" th:selected="${usuarios.trimestre == '6'}" >Sexto Trimestre</option>
+                        <option value="7" th:selected="${usuarios.trimestre == '7'}" >Séptimo Trimestre</option>
+                    </select>
+
+                    <label for="pass">Contraseña:</label>
+                    <input type="password" id="pass" name="pass" th:value="${usuarios.pass}"  required/>
+
+                    <button type="submit">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Configuración del modal de ayuda
+                            addHelpModal('Ayuda - Editar Usuario', [
+                                {title: 'Modificación de datos', description: 'Actualice la información del usuario seleccionado.'},
+                                {title: 'Campos obligatorios', description: 'Los campos marcados con * son obligatorios y deben completarse.'},
+                                {title: 'Cambio de rol', description: 'Puede asignar un rol diferente al usuario (aprendiz o asesor).'},
+                                {title: 'Cambio de trimestre', description: 'Actualice el trimestre actual del usuario.'}
+                            ], 'Una vez realizados los cambios, haga clic en "Guardar Cambios" para aplicarlos.');
+
+                            // Asignar las funciones de los modales al ámbito global
+                            window.abrirModalPerfil = function () {
+                                document.getElementById('modalPerfil').style.display = 'block';
+                            };
+
+                            window.cerrarModalPerfil = function () {
+                                document.getElementById('modalPerfil').style.display = 'none';
+                            };
+
+                            // Asignar evento al botón de perfil
+                            const btnPerfil = document.querySelector('.icono-perfil');
+                            if (btnPerfil) {
+                                btnPerfil.addEventListener('click', window.abrirModalPerfil);
+                            }
+
+                            // Cerrar modal al hacer clic fuera
+                            window.onclick = function (event) {
+                                var modalPerfil = document.getElementById('modalPerfil');
+                                if (modalPerfil && event.target === modalPerfil) {
+                                    window.cerrarModalPerfil();
+                                }
+                            };
+                        });
+        </script>
+    </body>
+</html>

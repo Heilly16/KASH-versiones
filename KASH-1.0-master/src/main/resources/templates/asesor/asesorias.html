@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Asesor - Asesorías</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/asesor/asesorias.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/asesor/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/asesor/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/crearAsesorias.png" alt="">
+                <a th:href="@{/asesor/crearAsesorias}" class="link">Crear asesorías</a>
+            </div>
+
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/asesor/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/asesor/prueba}" class="link">Pruebas</a>
+            </div>
+
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion">
+                    <a th:href="@{/index}">Cerrar sesión</a>
+                </button>
+            </div>
+        </div>
+
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${asesor.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/asesor/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAsesor/{id}(id=${asesor.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${asesor.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${asesor.nombres} + ' ' + ${asesor.primerA} + ' ' + ${asesor.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${asesor.programa}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <section class="seccion-asesorias">
+                <h2 class="titulo-seccion">Asesorías Programadas</h2>
+
+
+
+                <!-- Tarjetas resumen -->
+                <div class="resumen-asesorias">
+                    <button class="card-resumen" onclick="filtrarAsesorias('todas')">
+                        <h3>Total</h3>
+                        <p th:text="${totalAsesorias}">0</p>
+                    </button>
+
+                    <button class="card-resumen" onclick="filtrarAsesorias('activas')">
+                        <h3>Activas</h3>
+                        <p th:text="${asesoriasActivas}">0</p>
+                    </button>
+
+                    <button class="card-resumen" onclick="filtrarAsesorias('completadas')">
+                        <h3>Completadas</h3>
+                        <p th:text="${asesoriasCompletadas}">0</p>
+                    </button>
+                </div>
+
+                <!-- Lista de asesorías -->
+                <div th:each="asesoria : ${asesorias}"
+                     th:class="'card-asesoria ' 
+                     + (${asesoria.estado} == 'Activa' ? ' activa' : '') 
+                     + (${asesoria.completada} ? ' completada' : '') 
+                     + (${asesoria.id} == ${idAsesoriaProxima} ? ' proxima' : '')">
+
+                    <div class="etiqueta-proxima" th:if="${asesoria.id} == ${idAsesoriaProxima}">
+                        Próxima asesoría
+                    </div>
+
+                    <div class="card-encabezado">
+                        <div>
+                            <h3><i class="fa-solid fa-chalkboard-user"></i> Asesoría #[[${asesoria.id}]]</h3>
+                            <p class="grupo"><i class="fa-solid fa-users"></i> Grupo: [[${asesoria.grupo.nombre}]]</p>
+                        </div>
+
+                        <div class="botones-accion">
+                            <form th:id="'formCompletar' + ${asesoria.id}"
+                                  th:action="@{'/asesor/asesoria/' + ${asesoria.id} + '/completar'}"
+                                  method="post" th:if="${!asesoria.completada}">
+                                <button type="button"
+                                        class="btn-completar"
+                                        th:attr="data-id=${asesoria.id},
+                                        data-grupo=${asesoria.grupo.nombre},
+                                        data-fecha=${asesoria.fechaFormateada},
+                                        data-hora=${asesoria.horaFormateada}"
+                                        onclick="abrirModalConfirmacion(this)">
+                                    <i class="fa-solid fa-check"></i> Completada
+                                </button>
+                            </form>
+
+                            <button class="btn-asesoria btn-ver-asesorias" 
+                                    th:attr="data-grupo-id=${asesoria.grupo.id}"
+                                    onclick="verTodasLasAsesorias(this)">
+                                <i class="fa-solid fa-list"></i> Ver todas
+                            </button>
+
+                            <a class="btn-asesoria" th:href="${asesoria.link}" target="_blank">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Ir a la asesoría
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <hr>
+
+                    <div class="card-detalles">
+                        <p><i class="fa-solid fa-calendar-day"></i> <strong>Fecha de la asesoría:</strong> [[${asesoria.fechaFormateada}]]</p>
+
+                        <p><strong>Hora:</strong> [[${asesoria.horaFormateada}]]</p>
+
+                        <p><i class="fa-solid fa-circle-info"></i> <strong>Estado:</strong> [[${asesoria.estado}]]</p>
+
+                        <p><i class="fa-solid fa-check-double"></i> <strong>¿Completada?:</strong> 
+                            <span th:text="${asesoria.completada} ? 'Sí' : 'No'"></span>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Mensaje si no hay asesorías -->
+                <div th:if="${asesorias == null or asesorias.isEmpty()}">
+                    <p class="no-asesorias">No tienes asesorías asignadas.</p>
+                </div>
+            </section>
+        </div>
+
+        <div id="modalConfirmacion" class="modal-confirmacion">
+            <div class="modal-contenido-confirmacion">
+                <span class="close" onclick="cerrarModal()" style="float:right; font-size: 24px; cursor: pointer;">&times;</span>
+                <p id="mensajeConfirmacion"></p>
+                <form id="formConfirmacion" method="post">
+                    <button type="submit" class="btn-confirmar">Confirmar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-cancelar">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para mostrar todas las asesorías de un grupo -->
+        <div id="modalAsesorias" class="modal-confirmacion">
+            <div class="modal-contenido-confirmacion" style="width: 80%; max-width: 800px;">
+                <span class="close" onclick="cerrarModalAsesorias()" style="float:right; font-size: 24px; cursor: pointer;">&times;</span>
+                <h3 id="tituloGrupoAsesorias" style="margin-bottom: 20px;"></h3>
+                <div id="contenidoAsesorias">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Fecha</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Hora</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Estado</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Completada</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Link</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAsesorias">
+                            <!-- Aquí se cargarán dinámicamente las asesorías -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" onclick="cerrarModalAsesorias()" class="btn-cancelar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para cambiar fecha de asesoría -->
+        <div id="modalCambiarFecha" class="modal-confirmacion">
+            <div class="modal-contenido-confirmacion" style="width: 400px;">
+                <span class="close" onclick="cerrarModalCambiarFecha()" style="float:right; font-size: 24px; cursor: pointer;">&times;</span>
+                <h3 style="margin-bottom: 20px;">Cambiar fecha/hora de asesoría</h3>
+                <div>
+                    <input type="hidden" id="asesoriaIdCambioFecha">
+                    <input type="hidden" id="fechaActual">
+                    <input type="hidden" id="horaActual">
+
+                    <div style="margin-bottom: 15px;">
+                        <label for="nuevaFecha" style="display: block; margin-bottom: 5px; font-weight: bold;">Nueva fecha:</label>
+                        <input type="date" id="nuevaFecha" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <small style="color: #666; display: block; margin-top: 5px;">Deja en blanco para mantener la fecha actual</small>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="nuevaHora" style="display: block; margin-bottom: 5px; font-weight: bold;">Nueva hora:</label>
+                        <input type="time" id="nuevaHora" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <small style="color: #666; display: block; margin-top: 5px;">Deja en blanco para mantener la hora actual</small>
+                    </div>
+                    <div id="mensajeErrorCambioFecha" style="color: red; margin-bottom: 15px; display: none;"></div>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" onclick="verificarConflictos()" class="btn-confirmar">Guardar cambios</button>
+                    <button type="button" onclick="cerrarModalCambiarFecha()" class="btn-cancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Asesorías</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar sus asesorías programadas. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Filtros:</strong> Puede filtrar asesorías por activas, completadas o ver todas.</li>
+                    <li><strong>Acceso:</strong> Acceda directamente a sus asesorías mediante el enlace correspondiente.</li>
+                    <li><strong>Marcar completada:</strong> Puede marcar una asesoría como completada cuando finalice.</li>
+                    <li><strong>Ver todas:</strong> Visualice todas las asesorías de un grupo específico.</li>
+                </ul>
+                <p>La próxima asesoría programada aparecerá destacada en la parte superior.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script>
+                    function filtrarAsesorias(filtro) {
+                        const todas = document.querySelectorAll('.card-asesoria');
+                        todas.forEach(div => {
+                            div.style.display = 'block'; // Mostrar todo por defecto
+                            if (filtro === 'activas' && !div.classList.contains('activa')) {
+                                div.style.display = 'none';
+                            } else if (filtro === 'completadas' && !div.classList.contains('completada')) {
+                                div.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    function abrirModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'block';
+                    }
+
+                    function cerrarModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'none';
+                    }
+
+                    function abrirModalConfirmacion(btn) {
+                        const id = btn.getAttribute('data-id');
+                        const grupo = btn.getAttribute('data-grupo');
+                        const fecha = btn.getAttribute('data-fecha');
+                        const hora = btn.getAttribute('data-hora');
+
+                        document.getElementById('mensajeConfirmacion').textContent =
+                                `¿Estás seguro que deseas marcar como completada la asesoría del grupo ${grupo} del ${fecha} a las ${hora}?`;
+
+                        const form = document.getElementById('formConfirmacion');
+                        form.action = `/asesor/asesoria/${id}/completar`;
+
+                        document.getElementById('modalConfirmacion').style.display = 'flex';
+                    }
+
+                    function cerrarModal() {
+                        document.getElementById('modalConfirmacion').style.display = 'none';
+                    }
+
+                    function verTodasLasAsesorias(btn) {
+                        const grupoId = btn.getAttribute('data-grupo-id');
+                        const nombreGrupo = btn.closest('.card-asesoria').querySelector('.grupo').textContent.replace('Grupo: ', '');
+
+                        // Mostrar título del grupo en el modal
+                        document.getElementById('tituloGrupoAsesorias').textContent = `Asesorías del grupo: ${nombreGrupo}`;
+
+                        // Limpiar tabla
+                        document.getElementById('tablaAsesorias').innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando asesorías...</td></tr>';
+
+                        // Mostrar modal
+                        document.getElementById('modalAsesorias').style.display = 'flex';
+
+                        // Cargar datos
+                        fetch(`/asesor/grupo/${grupoId}/asesorias`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const tabla = document.getElementById('tablaAsesorias');
+                                    tabla.innerHTML = '';
+
+                                    const asesorias = data.asesorias;
+
+                                    if (asesorias.length === 0) {
+                                        tabla.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay asesorías para este grupo</td></tr>';
+                                        return;
+                                    }
+
+                                    asesorias.forEach(asesoria => {
+                                        const row = document.createElement('tr');
+
+                                        // Fecha
+                                        const tdFecha = document.createElement('td');
+                                        tdFecha.style.padding = '10px';
+                                        tdFecha.style.borderBottom = '1px solid #ddd';
+                                        tdFecha.textContent = asesoria.fechaFormateada;
+                                        row.appendChild(tdFecha);
+
+                                        // Hora
+                                        const tdHora = document.createElement('td');
+                                        tdHora.style.padding = '10px';
+                                        tdHora.style.borderBottom = '1px solid #ddd';
+                                        tdHora.textContent = asesoria.horaFormateada;
+                                        row.appendChild(tdHora);
+
+                                        // Estado
+                                        const tdEstado = document.createElement('td');
+                                        tdEstado.style.padding = '10px';
+                                        tdEstado.style.borderBottom = '1px solid #ddd';
+                                        tdEstado.textContent = asesoria.estado;
+                                        row.appendChild(tdEstado);
+
+                                        // Completada
+                                        const tdCompletada = document.createElement('td');
+                                        tdCompletada.style.padding = '10px';
+                                        tdCompletada.style.borderBottom = '1px solid #ddd';
+                                        tdCompletada.textContent = asesoria.completada ? 'Sí' : 'No';
+                                        row.appendChild(tdCompletada);
+
+                                        // Link
+                                        const tdLink = document.createElement('td');
+                                        tdLink.style.padding = '10px';
+                                        tdLink.style.borderBottom = '1px solid #ddd';
+                                        if (asesoria.link) {
+                                            const link = document.createElement('a');
+                                            link.href = asesoria.link;
+                                            link.target = '_blank';
+                                            link.textContent = 'Abrir';
+                                            link.style.color = '#0066cc';
+                                            tdLink.appendChild(link);
+                                        } else {
+                                            tdLink.textContent = 'No disponible';
+                                        }
+                                        row.appendChild(tdLink);
+
+                                        // Acciones
+                                        const tdAcciones = document.createElement('td');
+                                        tdAcciones.style.padding = '10px';
+                                        tdAcciones.style.borderBottom = '1px solid #ddd';
+
+                                        // Solo permitir cambiar fecha si no está completada
+                                        if (!asesoria.completada) {
+                                            const btnCambiarFecha = document.createElement('button');
+                                            btnCambiarFecha.type = 'button';
+                                            btnCambiarFecha.className = 'btn-cambiar-fecha';
+                                            btnCambiarFecha.textContent = 'Cambiar fecha';
+                                            btnCambiarFecha.style.backgroundColor = '#03314b';
+                                            btnCambiarFecha.style.color = 'white';
+                                            btnCambiarFecha.style.border = 'none';
+                                            btnCambiarFecha.style.borderRadius = '4px';
+                                            btnCambiarFecha.style.padding = '5px 10px';
+                                            btnCambiarFecha.style.cursor = 'pointer';
+                                            btnCambiarFecha.onclick = function () {
+                                                abrirModalCambiarFecha(asesoria.id);
+                                            };
+                                            tdAcciones.appendChild(btnCambiarFecha);
+                                        } else {
+                                            tdAcciones.textContent = 'No disponible';
+                                        }
+
+                                        row.appendChild(tdAcciones);
+
+                                        tabla.appendChild(row);
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    document.getElementById('tablaAsesorias').innerHTML =
+                                            '<tr><td colspan="6" style="text-align:center;">Error al cargar las asesorías</td></tr>';
+                                });
+                    }
+
+                    function cerrarModalAsesorias() {
+                        document.getElementById('modalAsesorias').style.display = 'none';
+                    }
+
+                    function abrirModalCambiarFecha(asesoriaId) {
+                        document.getElementById('asesoriaIdCambioFecha').value = asesoriaId;
+                        document.getElementById('mensajeErrorCambioFecha').style.display = 'none';
+
+                        // Limpiar campos
+                        document.getElementById('nuevaFecha').value = '';
+                        document.getElementById('nuevaHora').value = '';
+
+                        // Establecer fecha y hora mínimas (hoy)
+                        const hoy = new Date();
+                        const fechaHoy = hoy.toISOString().split('T')[0];
+                        document.getElementById('nuevaFecha').min = fechaHoy;
+
+                        // Obtener los datos actuales de la asesoría
+                        fetch(`/asesor/asesoria/${asesoriaId}/datos`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error) {
+                                        console.error('Error:', data.error);
+                                    } else {
+                                        // Guardar los valores actuales para usarlos si el usuario no ingresa nuevos valores
+                                        document.getElementById('fechaActual').value = data.fecha;
+                                        document.getElementById('horaActual').value = data.hora;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                });
+
+                        document.getElementById('modalCambiarFecha').style.display = 'flex';
+                    }
+
+                    function cerrarModalCambiarFecha() {
+                        document.getElementById('modalCambiarFecha').style.display = 'none';
+                    }
+
+                    function verificarConflictos() {
+                        const asesoriaId = document.getElementById('asesoriaIdCambioFecha').value;
+                        let nuevaFecha = document.getElementById('nuevaFecha').value;
+                        let nuevaHora = document.getElementById('nuevaHora').value;
+                        const errorDiv = document.getElementById('mensajeErrorCambioFecha');
+
+                        // Si no se ingresó fecha o hora, usar los valores actuales
+                        if (!nuevaFecha) {
+                            nuevaFecha = document.getElementById('fechaActual').value;
+                        }
+
+                        if (!nuevaHora) {
+                            nuevaHora = document.getElementById('horaActual').value;
+                        }
+
+                        // Validar que se tenga al menos una fecha y hora (ya sea nueva o actual)
+                        if (!nuevaFecha || !nuevaHora) {
+                            errorDiv.textContent = 'Error al obtener los datos de la asesoría.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+
+                        // Verificar que la fecha no sea anterior a hoy
+                        const hoy = new Date();
+                        const fechaSeleccionada = new Date(nuevaFecha);
+                        fechaSeleccionada.setHours(0, 0, 0, 0);
+                        hoy.setHours(0, 0, 0, 0);
+
+                        if (fechaSeleccionada < hoy) {
+                            errorDiv.textContent = 'La fecha no puede ser anterior a hoy.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+
+                        // Validar horario (no entre 10 PM y 6 AM)
+                        const hora = parseInt(nuevaHora.split(':')[0]);
+                        if (hora >= 22 || hora < 6) {
+                            errorDiv.textContent = 'No se pueden programar asesorías entre las 10:00 PM y las 6:00 AM.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+
+                        // Crear FormData para enviar
+                        const formData = new FormData();
+                        formData.append('asesoriaId', asesoriaId);
+                        formData.append('nuevaFecha', nuevaFecha);
+                        formData.append('nuevaHora', nuevaHora);
+
+                        // Enviar solicitud al servidor para verificar conflictos
+                        fetch('/asesor/asesoria/verificar-conflictos', {
+                            method: 'POST',
+                            body: formData
+                        })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.conflicto) {
+                                        errorDiv.textContent = data.mensaje;
+                                        errorDiv.style.display = 'block';
+                                    } else {
+                                        // Si no hay conflictos, proceder a guardar
+                                        guardarCambioFecha(asesoriaId, nuevaFecha, nuevaHora);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    errorDiv.textContent = 'Error al verificar conflictos. Inténtalo de nuevo.';
+                                    errorDiv.style.display = 'block';
+                                });
+                    }
+
+                    function guardarCambioFecha(asesoriaId, nuevaFecha, nuevaHora) {
+                        const errorDiv = document.getElementById('mensajeErrorCambioFecha');
+
+                        // Crear FormData para enviar
+                        const formData = new FormData();
+                        formData.append('nuevaFecha', nuevaFecha);
+                        formData.append('nuevaHora', nuevaHora);
+
+                        // Enviar solicitud al servidor para actualizar
+                        fetch(`/asesor/asesoria/${asesoriaId}/actualizar-fecha`, {
+                            method: 'POST',
+                            body: formData
+                        })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error) {
+                                        errorDiv.textContent = data.error;
+                                        errorDiv.style.display = 'block';
+                                    } else {
+                                        // Cerrar modal y mostrar mensaje de éxito
+                                        cerrarModalCambiarFecha();
+                                        cerrarModalAsesorias();
+
+                                        // Mostrar notificación
+                                        alert(`Fecha/hora actualizada correctamente a ${data.nuevaFecha} a las ${data.nuevaHora}`);
+
+                                        // Recargar la página para ver los cambios
+                                        location.reload();
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    errorDiv.textContent = 'Error al actualizar la fecha/hora. Inténtalo de nuevo.';
+                                    errorDiv.style.display = 'block';
+                                });
+                    }
+
+                    // Cerrar el modal al hacer clic fuera
+                    window.onclick = function (event) {
+                        const modalPerfil = document.getElementById('modalPerfil');
+                        const modalConfirmacion = document.getElementById('modalConfirmacion');
+                        const modalAsesorias = document.getElementById('modalAsesorias');
+                        const modalCambiarFecha = document.getElementById('modalCambiarFecha');
+
+                        if (event.target === modalPerfil) {
+                            cerrarModalPerfil();
+                        }
+
+                        if (event.target === modalConfirmacion) {
+                            cerrarModal();
+                        }
+
+                        if (event.target === modalAsesorias) {
+                            cerrarModalAsesorias();
+                        }
+
+                        if (event.target === modalCambiarFecha) {
+                            cerrarModalCambiarFecha();
+                        }
+                    }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>ASESOR GRUPOS</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="../../css/asesor/crearAsesorias.css" />
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/asesor/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/asesor/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/crearAsesorias.png" alt="">
+                <a th:href="@{/asesor/crearAsesorias}" class="link">Crear asesorías</a>
+            </div>
+
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/asesor/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/asesor/prueba}" class="link">Pruebas</a>
+            </div>
+
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion">
+                    <a th:href="@{/index}">Cerrar sesión</a>
+                </button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${asesor.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/asesor/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAsesor/{id}(id=${asesor.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${asesor.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${asesor.nombres} + ' ' + ${asesor.primerA} + ' ' + ${asesor.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${asesor.programa}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Mensajes de éxito y error -->
+            <div th:if="${error}" style="color: red; margin-bottom: 15px;">
+                <p th:text="${error}"></p>
+            </div>
+
+            <div th:if="${mensaje}" style="color: green; margin-bottom: 15px;">
+                <p th:text="${mensaje}"></p>
+            </div>
+
+            <div class="contenido-grid">
+                <!-- MODAL PARA FORMULARIO -->
+                <div id="modalFormulario" class="modal">
+                    <div class="modal-content">
+                        <span class="cerrar-modal" onclick="cerrarModalFormulario()">&times;</span>
+                        <h2>Crear asesoría para <span id="grupoNombreSpan"></span></h2>
+
+                        <form th:action="@{/asesor/guardarAsesoria}" method="post" class="form-asesoria" id="formularioAsesoria" onsubmit="return validarFormulario()">
+                            <input type="hidden" name="grupoId" id="grupoIdInput" />
+
+                            <label for="fecha">Fecha:</label>
+                            <input type="date" name="fecha" id="fechaSelector" required readonly/>
+
+                            <label for="hora">Hora:</label>
+                            <input type="time" name="hora" id="horaSelector" min="06:00" max="22:00" required />
+                            <small style="color: #555;">Solo se permiten horarios entre las 6:00 AM y las 10:00 PM</small>
+
+                            <label for="link">Link de reunión:</label>
+                            <input type="url" name="link" placeholder="https://meet..." required />
+
+                            <label for="diasAsesoria">Días de asesoría:</label>
+                            <input type="number" name="diasAsesoria" min="1" value="4" required 
+                                   oninput="mostrarMensajeDias()" />
+                            <small id="mensajeDias" style="color: #555; display: none;">
+                                Indica cuántos días tendrá la asesoría para este grupo. Recuerda que la asesoria se asignara para la misma hora, cada 8 días.
+                            </small>
+
+                            <label for="fechaInicio">Fecha de inicio:</label>
+                            <input type="date" name="fechaInicio" id="fechaInicioSelector" required />
+
+                            <button type="submit">Crear Asesoría</button>
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- COLUMNA DERECHA -->
+                <div class="Grupos">
+                    <h2 class="titulo-grupos">Selecciona un grupo para crear asesoría</h2>
+                    <div class="grid-grupos">
+                        <div th:each="grupo : ${grupos}" class="card-grupo">
+                            <div class="card-header">
+                                <h3 th:text="${grupo.nombre}"></h3>
+                                <span class="estado" th:text="${grupo.estado}"></span>
+                            </div>
+
+                            <div class="card-body">
+                                <p><strong>Cantidad:</strong> <span th:text="${grupo.cantidad}"></span></p>
+                                <button class="btn-asignar"
+                                        th:attr="data-id=${grupo.id}, data-nombre=${grupo.nombre}">
+                                    Asignar asesoría
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <script>
+                // Abrir modal de crear asesoría con datos del grupo
+                function abrirFormulario(grupoId, grupoNombre) {
+                    document.getElementById('modalFormulario').style.display = 'block';
+                    document.getElementById('grupoIdInput').value = grupoId;
+                    document.getElementById('grupoNombreSpan').textContent = grupoNombre;
+
+                    // Actualizar fechas mínimas
+                    const hoy = new Date();
+                    const manana = new Date(hoy);
+                    manana.setDate(hoy.getDate() + 1);
+
+                    const formatoFecha = fecha => {
+                        const year = fecha.getFullYear();
+                        const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const day = String(fecha.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+
+                    const fechaSelector = document.getElementById('fechaSelector');
+                    const fechaInicioSelector = document.getElementById('fechaInicioSelector');
+
+                    fechaSelector.min = formatoFecha(hoy);
+                    fechaSelector.value = formatoFecha(hoy);
+
+                    fechaInicioSelector.min = formatoFecha(manana);
+                    fechaInicioSelector.value = formatoFecha(manana);
+                }
+
+                function cerrarModalFormulario() {
+                    document.getElementById('modalFormulario').style.display = 'none';
+                }
+
+                // Abrir modal perfil
+                function abrirModalPerfil() {
+                    document.getElementById('modalPerfil').style.display = 'block';
+                }
+
+                function cerrarModalPerfil() {
+                    document.getElementById('modalPerfil').style.display = 'none';
+                }
+
+                // Activar botón de asignar asesoría
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.querySelectorAll(".btn-asignar").forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const grupoId = btn.getAttribute("data-id");
+                            const grupoNombre = btn.getAttribute("data-nombre");
+                            abrirFormulario(grupoId, grupoNombre);
+                        });
+                    });
+                });
+
+                // Cerrar modales al hacer clic fuera
+                window.onclick = function (event) {
+                    const modalFormulario = document.getElementById('modalFormulario');
+                    const modalPerfil = document.getElementById('modalPerfil');
+
+                    if (event.target === modalFormulario) {
+                        modalFormulario.style.display = 'none';
+                    }
+
+                    if (event.target === modalPerfil) {
+                        modalPerfil.style.display = 'none';
+                    }
+                }
+            </script>
+
+
+        </div>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Configuración del modal de ayuda
+                    addHelpModal('Ayuda - Crear Asesorías', [
+                        {title: 'Creación', description: 'Cree nuevas asesorías para los grupos que administra.'},
+                        {title: 'Programación', description: 'Defina fecha, hora y link de reunión para la nueva asesoría.'},
+                    ], 'Las asesorías creadas serán visibles para todos los aprendices registrados en el grupo correspondiente.');
+
+                    // Resto del código específico de la página
+                    function abrirModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'block';
+                    }
+
+                    function cerrarModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'none';
+                    }
+
+                    // Cerrar modal al hacer clic fuera
+                    window.onclick = function (event) {
+                        var modalPerfil = document.getElementById('modalPerfil');
+                        if (modalPerfil && event.target === modalPerfil) {
+                            cerrarModalPerfil();
+                        }
+                    };
+                });
+        </script>
+        <script>
+            function mostrarMensajeDias() {
+                document.getElementById('mensajeDias').style.display = 'block';
+            }
+
+            // Función para validar el formulario antes de enviarlo
+            function validarFormulario() {
+                // Obtener elementos del formulario
+                const fechaSelector = document.getElementById('fechaSelector');
+                const horaSelector = document.getElementById('horaSelector');
+                const fechaInicioSelector = document.getElementById('fechaInicioSelector');
+
+                // Obtener valores
+                const fechaValor = fechaSelector.value;
+                const horaValor = horaSelector.value;
+                const fechaInicioValor = fechaInicioSelector.value;
+
+                // Validar hora (entre 6:00 AM y 10:00 PM)
+                if (horaValor < "06:00" || horaValor > "22:00") {
+                    alert("Solo se permiten horarios entre las 6:00 AM y las 10:00 PM");
+                    return false;
+                }
+
+                // Validar que la fecha de inicio sea a partir de mañana
+                const hoy = new Date();
+                const manana = new Date(hoy);
+                manana.setDate(hoy.getDate() + 1);
+                manana.setHours(0, 0, 0, 0); // Establecer a medianoche
+
+                const fechaInicio = new Date(fechaInicioValor);
+                if (fechaInicio < manana) {
+                    alert("La fecha de inicio debe ser al menos a partir de mañana");
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Configurar fechas mínimas al cargar la página
+            document.addEventListener('DOMContentLoaded', function () {
+                // Obtener fecha actual y mañana
+                const hoy = new Date();
+                const manana = new Date(hoy);
+                manana.setDate(hoy.getDate() + 1);
+
+                // Formatear fechas para input date (YYYY-MM-DD)
+                const formatoFecha = fecha => {
+                    const year = fecha.getFullYear();
+                    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const day = String(fecha.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                // Configurar fechas mínimas
+                const fechaSelector = document.getElementById('fechaSelector');
+                const fechaInicioSelector = document.getElementById('fechaInicioSelector');
+
+                // Establecer fecha mínima y valor por defecto
+                const fechaHoyFormato = formatoFecha(hoy);
+                const fechaMananaFormato = formatoFecha(manana);
+
+                fechaSelector.min = fechaHoyFormato;
+                fechaSelector.value = fechaHoyFormato;
+
+                fechaInicioSelector.min = fechaMananaFormato;
+                fechaInicioSelector.value = fechaMananaFormato;
+
+                // Validar hora seleccionada
+                const horaSelector = document.getElementById('horaSelector');
+                horaSelector.addEventListener('change', function () {
+                    const hora = this.value;
+                    if (hora < "06:00" || hora > "22:00") {
+                        alert("Solo se permiten horarios entre las 6:00 AM y las 10:00 PM");
+                        this.value = "06:00";
+                    }
+                });
+            });
+        </script>
+
+
+    </body>
+</html>

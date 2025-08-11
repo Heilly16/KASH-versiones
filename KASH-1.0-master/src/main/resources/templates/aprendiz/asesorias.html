@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Aprendiz Asesorías</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/aprendiz/asesorias.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/aprendiz/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/aprendiz/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/aprendiz/prueba}" class="link">Pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${aprendiz.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/aprendiz/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAprendiz/{id}(id=${aprendiz.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <form th:action="@{/actualizarPerfil}" method="POST">
+                                <p><strong>Usuario:</strong> <span th:text="${aprendiz.usuario}"></span></p>
+                                <p><strong>Nombre:</strong> <span th:text="${aprendiz.nombres} + ' ' + ${aprendiz.primerA} + ' ' + ${aprendiz.segundoA}"></span></p>
+                                <p>
+                                    <strong>Tipo de documento:</strong>
+                                    <select name="tDocumento" class="campo-editable">
+                                        <option th:value="${aprendiz.tDocumento}" th:text="${aprendiz.tDocumento}" selected></option>
+                                        <option th:if="${aprendiz.tDocumento != 'CC'}" value="CC">CC</option>
+                                        <option th:if="${aprendiz.tDocumento != 'TI'}" value="TI">TI</option>
+                                        <option th:if="${aprendiz.tDocumento != 'CE'}" value="CE">CE</option>
+                                        <option th:if="${aprendiz.tDocumento != 'Pasaporte'}" value="Pasaporte">Pasaporte</option>
+                                    </select>
+                                </p>
+                                <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
+                                <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                                <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
+                                <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
+                                <p>
+                                    <strong>Correo:</strong>
+                                    <input type="email" name="correo" class="campo-editable" th:value="${aprendiz.correo}" required>
+                                </p>
+                                <p>
+                                    <strong>Número de contacto:</strong>
+                                    <input type="text" name="numero" class="campo-editable" th:value="${aprendiz.numero}" required>
+                                </p>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+                                <button type="submit" class="btn-actualizar">Actualizar datos</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <section class="seccion-asesorias">
+                <h2 class="titulo-seccion">Asesorías Programadas</h2>
+
+                <!-- Ventana modal de ayuda -->
+                <div id="helpModal" class="help-modal">
+                    <div class="help-modal-header">
+                        <h3><i class="fas fa-question-circle"></i> Ayuda - Asesorías</h3>
+                        <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+                    </div>
+                    <div class="help-modal-content">
+                        <p>Esta sección le permite gestionar sus asesorías programadas. A continuación se detallan las principales funcionalidades:</p>
+                        <ul>
+                            <li><strong>Filtros:</strong> Puede filtrar asesorías por activas, completadas o ver todas.</li>
+                            <li><strong>Acceso:</strong> Acceda directamente a sus asesorías mediante el enlace correspondiente.</li>
+                            <li><strong>Detalles:</strong> Visualice información detallada de cada asesoría como fecha, hora y estado.</li>
+                        </ul>
+                        <p>La próxima asesoría programada aparecerá destacada en la parte superior.</p>
+                    </div>
+                    <div class="help-modal-footer">
+                        <button onclick="closeHelpModal()">Entendido</button>
+                    </div>
+                </div>
+
+                <!-- Tarjetas resumen -->
+                <div class="resumen-asesorias">
+                    <button class="card-resumen" onclick="filtrarAsesorias('todas')">
+                        <h3>Total</h3>
+                        <p th:text="${totalAsesorias}">0</p>
+                    </button>
+
+                    <button class="card-resumen" onclick="filtrarAsesorias('activas')">
+                        <h3>Activas</h3>
+                        <p th:text="${asesoriasActivas}">0</p>
+                    </button>
+
+                    <button class="card-resumen" onclick="filtrarAsesorias('completadas')">
+                        <h3>Completadas</h3>
+                        <p th:text="${asesoriasCompletadas}">0</p>
+                    </button>
+                </div>
+
+                <!-- Lista de asesorías -->
+                <div th:each="asesoria : ${asesorias}"
+                     th:class="'card-asesoria ' 
+                     + (${asesoria.estado} == 'Activa' ? ' activa' : '') 
+                     + (${asesoria.completada} ? ' completada' : '') 
+                     + (${asesoria.id} == ${idAsesoriaProxima} ? ' proxima' : '')">
+
+                    <div class="etiqueta-proxima" th:if="${asesoria.id} == ${idAsesoriaProxima}">
+                        Próxima asesoría
+                    </div>
+
+                    <div class="card-encabezado">
+                        <div>
+                            <h3><i class="fa-solid fa-chalkboard-user"></i> Asesoría #[[${asesoria.id}]]</h3>
+                            <p class="grupo"><i class="fa-solid fa-users"></i> Grupo: [[${asesoria.grupo.nombre}]]</p>
+                        </div>
+                        <div>
+                            <button class="btn-asesoria btn-ver-asesorias" 
+                                    th:attr="data-grupo-id=${asesoria.grupo.id}"
+                                    onclick="verTodasLasAsesorias(this)">
+                                <i class="fa-solid fa-list"></i> Ver todas
+                            </button>
+                            <a th:if="${asesoria.estado == 'Activa'}" class="btn-asesoria" th:href="${asesoria.link}" target="_blank">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Ir a la asesoría
+                            </a>
+                            <button th:if="${asesoria.estado != 'Activa'}" class="btn-asesoria-inactiva" disabled>
+                                <i class="fa-solid fa-ban"></i> Asesoría inactiva
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="card-detalles">
+                        <p><i class="fa-solid fa-calendar-day"></i> <strong>Fecha de la asesoría:</strong> [[${asesoria.fechaFormateada}]]</p>
+
+                        <p><strong>Hora:</strong> [[${asesoria.horaFormateada}]]</p>
+
+                        <p><i class="fa-solid fa-circle-info"></i> <strong>Estado:</strong> [[${asesoria.estado}]]</p>
+
+                        <p><i class="fa-solid fa-check-double"></i> <strong>¿Completada?:</strong> 
+                            <span th:text="${asesoria.completada} ? 'Sí' : 'No'"></span>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Mensaje si no hay asesorías -->
+                <div th:if="${asesorias == null or asesorias.isEmpty()}">
+                    <p class="no-asesorias">No tienes asesorías asignadas.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal para mostrar todas las asesorías de un grupo -->
+        <div id="modalAsesorias" class="modal-perfil">
+            <div class="modal-contenido" style="width: 80%; max-width: 800px;">
+                <span class="cerrar-modal" onclick="cerrarModalAsesorias()">&times;</span>
+                <h3 id="tituloGrupoAsesorias" style="margin-bottom: 20px;"></h3>
+                <div id="contenidoAsesorias">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Fecha</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Hora</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Estado</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Completada</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Link</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAsesorias">
+                            <!-- Aquí se cargarán dinámicamente las asesorías -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" onclick="cerrarModalAsesorias()" class="btn-cancelar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script th:inline="javascript">
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Configuración del modal de ayuda desde el controlador
+                            const helpTitle = /*[[${helpTitle}]]*/ 'Ayuda - Asesorías';
+                            const helpItems = /*[[${helpItems}]]*/ [];
+                            const helpFooter = /*[[${helpFooter}]]*/ '';
+
+                            // Convertir array de arrays a array de objetos para addHelpModal
+                            const formattedItems = [];
+                            if (helpItems && helpItems.length > 0) {
+                                for (let i = 0; i < helpItems.length; i++) {
+                                    formattedItems.push({
+                                        title: helpItems[i][0],
+                                        description: helpItems[i][1]
+                                    });
+                                }
+                            }
+
+                            // Agregar el modal de ayuda
+                            addHelpModal(helpTitle, formattedItems, helpFooter);
+
+                            // Otras funciones específicas de esta página
+                            function abrirModalPerfil() {
+                                document.getElementById('modalPerfil').style.display = 'block';
+                            }
+
+                            function cerrarModalPerfil() {
+                                document.getElementById('modalPerfil').style.display = 'none';
+                            }
+
+                            // Asignar los eventos
+                            const btnPerfil = document.querySelector('.icono-perfil');
+                            if (btnPerfil) {
+                                btnPerfil.addEventListener('click', abrirModalPerfil);
+                            }
+
+                            // Cerrar modal al hacer clic fuera
+                            window.onclick = function (event) {
+                                var modalPerfil = document.getElementById('modalPerfil');
+                                if (modalPerfil && event.target === modalPerfil) {
+                                    cerrarModalPerfil();
+                                }
+                            };
+                        });
+
+                        function filtrarAsesorias(filtro) {
+                            const todas = document.querySelectorAll('.card-asesoria');
+                            todas.forEach(div => {
+                                div.style.display = 'block'; // Mostrar todo por defecto
+                                if (filtro === 'activas' && !div.classList.contains('activa')) {
+                                    div.style.display = 'none';
+                                } else if (filtro === 'completadas' && !div.classList.contains('completada')) {
+                                    div.style.display = 'none';
+                                }
+                            });
+                        }
+
+                        function verTodasLasAsesorias(btn) {
+                            const grupoId = btn.getAttribute('data-grupo-id');
+                            const modal = document.getElementById('modalAsesorias');
+                            const tabla = document.getElementById('tablaAsesorias');
+
+                            // Limpiar tabla anterior
+                            tabla.innerHTML = '';
+
+                            // Obtener información del grupo y sus asesorías
+                            fetch('/aprendiz/grupo/' + grupoId + '/asesorias')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        document.getElementById('tituloGrupoAsesorias').textContent = 'Asesorías del Grupo: ' + data.nombreGrupo;
+
+                                        // Mostrar asesorías en la tabla
+                                        data.asesorias.forEach(asesoria => {
+                                            const fila = document.createElement('tr');
+
+                                            const celdaFecha = document.createElement('td');
+                                            celdaFecha.textContent = asesoria.fechaFormateada;
+                                            celdaFecha.style.padding = '10px';
+                                            celdaFecha.style.borderBottom = '1px solid #ddd';
+
+                                            const celdaHora = document.createElement('td');
+                                            celdaHora.textContent = asesoria.horaFormateada;
+                                            celdaHora.style.padding = '10px';
+                                            celdaHora.style.borderBottom = '1px solid #ddd';
+
+                                            const celdaEstado = document.createElement('td');
+                                            celdaEstado.textContent = asesoria.estado;
+                                            celdaEstado.style.padding = '10px';
+                                            celdaEstado.style.borderBottom = '1px solid #ddd';
+
+                                            const celdaCompletada = document.createElement('td');
+                                            celdaCompletada.textContent = asesoria.completada ? 'Sí' : 'No';
+                                            celdaCompletada.style.padding = '10px';
+                                            celdaCompletada.style.borderBottom = '1px solid #ddd';
+
+                                            const celdaLink = document.createElement('td');
+                                            celdaLink.style.padding = '10px';
+                                            celdaLink.style.borderBottom = '1px solid #ddd';
+
+                                            if (asesoria.link && asesoria.estado === 'Activa') {
+                                                const linkBtn = document.createElement('a');
+                                                linkBtn.href = asesoria.link;
+                                                linkBtn.target = '_blank';
+                                                linkBtn.textContent = 'Acceder';
+                                                linkBtn.style.backgroundColor = '#007bff';
+                                                linkBtn.style.color = 'white';
+                                                linkBtn.style.padding = '5px 10px';
+                                                linkBtn.style.borderRadius = '3px';
+                                                linkBtn.style.textDecoration = 'none';
+                                                linkBtn.style.display = 'inline-block';
+                                                celdaLink.appendChild(linkBtn);
+                                            } else if (asesoria.estado !== 'Activa') {
+                                                const inactiveText = document.createElement('span');
+                                                inactiveText.textContent = 'Asesoría inactiva';
+                                                inactiveText.style.color = '#aaa';
+                                                celdaLink.appendChild(inactiveText);
+                                            } else {
+                                                celdaLink.textContent = 'No disponible';
+                                            }
+
+                                            fila.appendChild(celdaFecha);
+                                            fila.appendChild(celdaHora);
+                                            fila.appendChild(celdaEstado);
+                                            fila.appendChild(celdaCompletada);
+                                            fila.appendChild(celdaLink);
+
+                                            tabla.appendChild(fila);
+                                        });
+                                    })
+                                    .catch(error => {
+                                        console.error('Error al cargar asesorías:', error);
+
+                                        const fila = document.createElement('tr');
+                                        const celda = document.createElement('td');
+                                        celda.colSpan = 5;
+                                        celda.textContent = 'Error al cargar las asesorías';
+                                        celda.style.padding = '10px';
+                                        celda.style.textAlign = 'center';
+                                        fila.appendChild(celda);
+                                        tabla.appendChild(fila);
+                                    });
+
+                            modal.style.display = 'block';
+                        }
+
+                        function cerrarModalAsesorias() {
+                            document.getElementById('modalAsesorias').style.display = 'none';
+                        }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Formulario de Foro</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/formulario_foro.css">
+    </head>
+    <body>
+        <header>
+            <img class="logo" src="../img/logoKash.png" alt="Logo">
+            <h1>CREAR FORO</h1>
+            <h2>KASH</h2>
+        </header>
+ 
+
+        <form th:action="@{/foroNuevo}" method="post" enctype="multipart/form-data">
+
+            <h2>Formulario foro</h2>  
+
+            <label for="nombre_completo"></label>
+            <p>Nombre completo:</p>
+            <input class="pregunta" type="text" id="nombre" name="nombre" th:value="${usuario.nombres}" readonly="" required><br><br>
+
+            <p>Número de documento:</p>
+            <input class="pregunta" type="text" id="idUsuario" name="idUsuario" th:value="${usuario.idUsuario}" readonly="" required><br><br>
+
+            <p>Fecha:</p>
+            <input class="pregunta" type="date" id="fecha" name="fecha" readonly required>
+
+            <label for="trimestre" name="trimestre"></label>
+            <p>Trimestre:</p>
+            <input class="pregunta" type="text" id="trimestre" name="trimestre" th:value="${usuario.trimestre}" readonly=""><br></br>
+
+            <label for="tema"></label>
+            <p>Tema:</p>
+            <input class="pregunta" type="text" id="tema" name="tema" required><br><br>
+
+            <label for="contenido"></label>
+            <p>Contenido:</p>
+            <textarea class="pregunta" name="contenido" id="contenido"></textarea><br><br>
+
+            <label for="imagen">Imagen:</label>
+            <input type="file" name="imagen" accept="image/*"  placeholder="Agrega una imagen"/>
+
+            <button type="submit" class="boton">Enviar</button>
+        </form>
+
+        <script>
+            // Establece la fecha actual en el campo de fecha y deshabilita la edición
+            document.addEventListener('DOMContentLoaded', function () {
+                var today = new Date().toISOString().split('T')[0]; // Obtiene la fecha en formato YYYY-MM-DD
+                document.getElementById('fecha').value = today; // Asigna la fecha al campo
+            });
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Recuperar Contraseña</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="../css/Recuperar.css">
+    </head>
+    <body>
+
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <img class="logo" src="../img/logoKash.png" alt="Logo de KASH">
+                <h1>KASH</h1>
+            </div>
+            <nav>
+                <li><a th:href="@{/index}" class="btn-volver">volver</a></li>
+            </nav>
+        </header>
+
+        <div class="container">
+            <h2>Recuperar Contraseña</h2>
+
+            <!-- Formulario para ingresar el correo -->
+            <div id="correoForm">
+                <label for="email">Ingrese su correo:</label>
+                <input type="email" id="email" name="email" required>
+                <button onclick="enviarCodigo()">Enviar Código</button>
+            </div>
+
+            <!-- Formulario para ingresar el código -->
+            <div id="codigoForm" style="display: none;">
+                <label for="codigo">Ingrese el código recibido:</label>
+                <input type="text" id="codigo" name="codigo" required>
+                <button onclick="verificarCodigo()">Verificar Código</button>
+            </div>
+
+            <!-- Formulario para ingresar la nueva contraseña -->
+            <div id="passwordForm" style="display: none;">
+                <label for="nuevaPassword">Nueva Contraseña:</label>
+                <input type="password" id="nuevaPassword" name="nuevaPassword" required>
+                <button onclick="cambiarPassword()">Cambiar Contraseña</button>
+            </div>
+        </div>
+
+
+
+
+
+        <footer>
+            <div class="footer_nav">
+                <img class="logo1" src="../img/gov.co.png" alt="Logo Gov.co">
+                <img class="logo2" src="../img/cpdlv.png" alt="Logo CPDLV">
+                <img class="logo3" src="../img/logoSena.png" alt="Logo Sena">
+            </div>
+        </footer>
+
+
+        <script>
+            function enviarCodigo() {
+                let email = document.getElementById("email").value;
+                if (email === "") {
+                    Swal.fire("Error", "Ingrese un correo válido", "error");
+                    return;
+                }
+                fetch('/recuperacion/solicitar', {// 🔹 CORREGIDO
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({email})
+                })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success === "true") {
+                                Swal.fire("Éxito", data.message, "success");
+                                document.getElementById("correoForm").style.display = "none";
+                                document.getElementById("codigoForm").style.display = "block";
+                            } else {
+                                Swal.fire("Error", data.message, "error");
+                            }
+                        });
+            }
+
+            function verificarCodigo() {
+                let email = document.getElementById("email").value;
+                let codigo = document.getElementById("codigo").value;
+                if (codigo === "") {
+                    Swal.fire("Error", "Ingrese el código", "error");
+                    return;
+                }
+                fetch('/recuperacion/validar', {// 🔹 CORREGIDO
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({email, codigo})
+                })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success === "true") {
+                                Swal.fire("Éxito", data.message, "success");
+                                document.getElementById("codigoForm").style.display = "none";
+                                document.getElementById("passwordForm").style.display = "block";
+                            } else {
+                                Swal.fire("Error", data.message, "error");
+                            }
+                        });
+            }
+
+            function cambiarPassword() {
+                let email = document.getElementById("email").value;
+                let password = document.getElementById("nuevaPassword").value;
+
+                if (password === "") {
+                    Swal.fire("Error", "Ingrese la nueva contraseña", "error");
+                    return;
+                }
+
+                fetch('/recuperacion/cambiar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({email, nuevaPassword: password})
+                })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success === "true") {
+                                Swal.fire({
+                                    title: "Éxito",
+                                    text: data.message,
+                                    icon: "success",
+                                    confirmButtonText: "OK"
+                                }).then(() => {
+                                    window.location.href = "/index"; // 🔹 Redirige correctamente
+                                });
+                            } else {
+                                Swal.fire("Error", data.message, "error");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                        });
+            }
+
+        </script>
+
+    </body>
+</html>

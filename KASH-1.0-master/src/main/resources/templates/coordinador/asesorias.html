@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Coordinador - Asesorías</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/asesorias.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>CONTROL DE ASESORÍAS</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="contenido">
+                <!-- Estadísticas -->
+                <div class="estadisticas">
+                    <div class="card-estadistica">
+                        <h3>Total Asesorías</h3>
+                        <div class="valor" th:text="${totalAsesorias}">0</div>
+                    </div>
+                    <div class="card-estadistica">
+                        <h3>Asesorías Activas</h3>
+                        <div class="valor" th:text="${asesoriasActivas}">0</div>
+                    </div>
+                    <div class="card-estadistica">
+                        <h3>Asesorías Completadas</h3>
+                        <div class="valor" th:text="${asesoriasCompletadas}">0</div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filtros-container">
+                    <h2>Filtros de búsqueda</h2>
+                    <form id="filtroForm" th:action="@{/coordinador/asesorias/filtrar}" method="get">
+                        <div class="filtros">
+                            <div class="filtro-grupo">
+                                <label for="estado">Estado:</label>
+                                <select id="estado" name="estado" class="filtro-select">
+                                    <option value="todos" th:selected="${estadoFiltro == 'todos' || estadoFiltro == null}">Todos</option>
+                                    <option value="Activa" th:selected="${estadoFiltro == 'Activa'}">Activa</option>
+                                    <option value="Inactiva" th:selected="${estadoFiltro == 'Inactiva'}">Inactiva</option>
+                                </select>
+                            </div>
+
+                            <div class="filtro-grupo">
+                                <label for="completada">Completada:</label>
+                                <select id="completada" name="completada" class="filtro-select">
+                                    <option value="todos" th:selected="${completadaFiltro == 'todos' || completadaFiltro == null}">Todos</option>
+                                    <option value="si" th:selected="${completadaFiltro == 'si'}">Sí</option>
+                                    <option value="no" th:selected="${completadaFiltro == 'no'}">No</option>
+                                </select>
+                            </div>
+
+                            <div class="filtro-grupo">
+                                <label for="grupo">Grupo:</label>
+                                <select id="grupo" name="grupoId" class="filtro-select">
+                                    <option value="0" th:selected="${grupoIdFiltro == null}">Todos</option>
+                                    <option th:each="grupo : ${grupos}" 
+                                            th:value="${grupo.id}" 
+                                            th:text="${grupo.nombre}"
+                                            th:selected="${grupo.id == grupoIdFiltro}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="filtro-grupo">
+                                <label for="idUsuario">ID de Usuario:</label>
+                                <input type="text" id="idUsuario" name="idUsuario" th:value="${idUsuarioFiltro}" 
+                                       placeholder="Número de documento" class="filtro-input">
+                                <small class="input-help">Busca asesorías donde participe este usuario</small>
+                            </div>
+
+                            <div class="filtro-grupo">
+                                <label for="fechaDesde">Fecha desde:</label>
+                                <input type="date" id="fechaDesde" name="fechaDesde" th:value="${fechaDesdeFiltro}" class="filtro-input">
+                            </div>
+
+                            <div class="filtro-grupo">
+                                <label for="fechaHasta">Fecha hasta:</label>
+                                <input type="date" id="fechaHasta" name="fechaHasta" th:value="${fechaHastaFiltro}" class="filtro-input">
+                            </div>
+                        </div>
+
+                        <div class="filtros-botones">
+                            <button type="submit" class="btn-filtrar">
+                                <i class="fas fa-filter"></i> Aplicar filtros
+                            </button>
+                            <button type="button" onclick="limpiarFiltros()" class="btn-limpiar">
+                                <i class="fas fa-broom"></i> Limpiar filtros
+                            </button>
+                            <button type="button" onclick="descargarPDF()" class="btn-descargar">
+                                <i class="fas fa-file-download"></i> Descargar PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla de asesorías -->
+                <div class="tabla-container">
+                    <table class="tabla-asesorias">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Grupo</th>
+                                <th>Asesor</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Completada</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="asesoria : ${asesorias}">
+                                <td th:text="${asesoria.id}"></td>
+                                <td th:text="${asesoria.grupo.nombre}"></td>
+                                <td th:text="${asesoria.grupo.asesor != null ? asesoria.grupo.asesor.nombres + ' ' + asesoria.grupo.asesor.primerA : 'No asignado'}"></td>
+                                <td th:text="${asesoria.fechaFormateada}"></td>
+                                <td th:text="${asesoria.horaFormateada}"></td>
+                                <td>
+                                    <span th:class="${asesoria.estado == 'Activa' ? 'estado-activa' : 'estado-inactiva'}" 
+                                          th:text="${asesoria.estado}"></span>
+                                </td>
+                                <td>
+                                    <span th:class="${asesoria.completada ? 'completada-si' : 'completada-no'}" 
+                                          th:text="${asesoria.completada ? 'Sí' : 'No'}"></span>
+                                </td>
+                                <td>
+                                    <button class="btn-ver-aprendices" onclick="verAprendices(this)" th:data-id="${asesoria.id}">
+                                        <i class="fas fa-users"></i> Ver aprendices
+                                    </button>
+                                    <a th:if="${asesoria.link != null && !asesoria.link.isEmpty()}" 
+                                       th:href="${asesoria.link}" 
+                                       target="_blank" 
+                                       class="btn-link">
+                                        <i class="fas fa-external-link-alt"></i> Link
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${asesorias.isEmpty()}">
+                                <td colspan="8" class="no-resultados">No se encontraron asesorías con los filtros aplicados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Modal para mostrar aprendices -->
+                <div id="modalAprendices" class="modal">
+                    <div class="modal-contenido">
+                        <span class="cerrar-modal" onclick="cerrarModalAprendices()">&times;</span>
+                        <h2>Aprendices de la Asesoría</h2>
+                        <div id="aprendices-container">
+                            <!-- Aquí se cargarán los aprendices -->
+                            <div class="loading">Cargando...</div>
+                        </div>
+                        <button id="btn-descargar-asistencia" class="btn-descargar">
+                            <i class="fas fa-file-download"></i> Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de perfil (si existe) -->
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+                <!-- Contenido del modal de perfil -->
+            </div>
+        </div>
+
+        <!-- Agregar el nuevo modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Control de Asesorías</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite administrar todas las asesorías programadas en la plataforma. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Estadísticas:</strong> Visualice el total de asesorías, activas y completadas.</li>
+                    <li><strong>Filtros:</strong> Puede filtrar por estado, asesor, aprendiz, fechas y más.</li>
+                    <li><strong>Reportes:</strong> Genere reportes en PDF con la información filtrada.</li>
+                </ul>
+                <p>Las asesorías se visualizan en una tabla con todos sus detalles, incluyendo enlaces para acceder a ellas.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <script src="../../js/help-modal.js"></script>
+
+        <script>
+                    // Funciones específicas de esta página
+                    function limpiarFiltros() {
+                        document.getElementById("estado").value = "todos";
+                        document.getElementById("completada").value = "todos";
+                        document.getElementById("grupo").value = "0";
+                        document.getElementById("idUsuario").value = "";
+                        document.getElementById("fechaDesde").value = "";
+                        document.getElementById("fechaHasta").value = "";
+                        document.getElementById("filtroForm").submit();
+                    }
+
+                    function descargarPDF() {
+                        var estado = document.getElementById("estado").value;
+                        var completada = document.getElementById("completada").value;
+                        var grupoId = document.getElementById("grupo").value;
+                        var idUsuario = document.getElementById("idUsuario").value;
+                        var fechaDesde = document.getElementById("fechaDesde").value;
+                        var fechaHasta = document.getElementById("fechaHasta").value;
+
+                        var url = "/coordinador/asesorias/generarPDF?estado=" + estado +
+                                "&completada=" + completada +
+                                "&grupoId=" + grupoId +
+                                "&idUsuario=" + idUsuario;
+
+                        if (fechaDesde) {
+                            url += "&fechaDesde=" + fechaDesde;
+                        }
+                        if (fechaHasta) {
+                            url += "&fechaHasta=" + fechaHasta;
+                        }
+
+                        // Crear un anchor invisible, hacer clic en él y luego eliminarlo
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'reporte_asesorias.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+
+                    function abrirModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'block';
+                    }
+
+                    function cerrarModalPerfil() {
+                        document.getElementById('modalPerfil').style.display = 'none';
+                    }
+
+                    // Funciones para el modal de aprendices
+                    function verAprendices(button) {
+                        const asesoriaId = button.getAttribute('data-id');
+                        document.getElementById('modalAprendices').style.display = 'block';
+                        document.getElementById('aprendices-container').innerHTML = '<div class="loading">Cargando...</div>';
+
+                        // Configurar el botón de descarga
+                        const btnDescargar = document.getElementById('btn-descargar-asistencia');
+                        btnDescargar.onclick = function () {
+                            descargarAsistenciaPDF(asesoriaId);
+                        };
+
+                        // Cargar los datos de los aprendices
+                        fetch('/coordinador/asesorias/' + asesoriaId + '/aprendices')
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Error al cargar los aprendices');
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    mostrarAprendicesEnModal(data, asesoriaId);
+                                })
+                                .catch(error => {
+                                    document.getElementById('aprendices-container').innerHTML =
+                                            '<div class="error">Error al cargar los aprendices: ' + error.message + '</div>';
+                                });
+                    }
+
+                    function mostrarAprendicesEnModal(data, asesoriaId) {
+                        const container = document.getElementById('aprendices-container');
+
+                        if (!data || data.length === 0) {
+                            container.innerHTML = '<p>No hay aprendices asignados a esta asesoría.</p>';
+                            return;
+                        }
+
+                        let html = `
+                    <table class="aprendices-tabla">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                        data.forEach(aprendiz => {
+                            html += `
+                        <tr>
+                            <td>${aprendiz.idUsuario}</td>
+                            <td>${aprendiz.nombreCompleto}</td>
+                            <td>
+                                <span class="${aprendiz.asistio ? 'asistio-si' : 'asistio-no'}">
+                                    ${aprendiz.asistio ? 'Asistió' : 'No asistió'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                        });
+
+                        html += `
+                        </tbody>
+                    </table>
+                `;
+
+                        container.innerHTML = html;
+                    }
+
+                    function cerrarModalAprendices() {
+                        document.getElementById('modalAprendices').style.display = 'none';
+                    }
+
+                    function descargarAsistenciaPDF(asesoriaId) {
+                        window.open('/coordinador/asesorias/' + asesoriaId + '/asistencia/pdf', '_blank');
+                    }
+
+                    // Cerrar modales al hacer clic fuera de ellos
+                    window.onclick = function (event) {
+                        const modalPerfil = document.getElementById('modalPerfil');
+                        if (event.target == modalPerfil) {
+                            cerrarModalPerfil();
+                        }
+
+                        const modalAprendices = document.getElementById('modalAprendices');
+                        if (event.target == modalAprendices) {
+                            cerrarModalAprendices();
+                        }
+                    };
+        </script>
+    </body>
+</html> 

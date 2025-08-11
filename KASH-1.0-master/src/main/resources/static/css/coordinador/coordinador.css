@@ -1,0 +1,342 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(255, 255, 255);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Nunito', sans-serif;
+}
+
+.barra {
+    width: 60px;
+    background-color: rgb(4, 55, 77);
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    position: fixed;
+    transition: width 0.3s ease;
+    z-index: 2;
+}
+.barra:hover {
+    width: 240px;
+}
+
+.barra:hover .link {
+    display: inline;
+}
+
+.barra a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 14px;
+    color: white;
+    display: block;
+    transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.barra a:hover {
+    color: #f0f0f0;
+}
+
+.selection {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 5px;
+    padding: 10px 15px;
+}
+
+.selection:hover {
+    background-color: rgb(5, 35, 48);
+    transform: translateX(10px); /* Desplazar el elemento hacia la derecha */
+}
+
+.selection .link {
+    display: none;
+    margin-left: 5px;
+    white-space: nowrap;
+}
+
+.icono {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.icono:hover {
+    transform: rotate(20deg);
+}
+
+.barra.expanded .link {
+    display: inline;
+}
+
+.barra.expanded {
+    width: 200px;
+}
+
+.cuerpo {
+    margin-left: 60px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f2f2f2;
+}
+
+/* HEADER */
+header {
+    width: calc(100% - 60px);
+    padding: 15px 20px;
+    position: fixed;
+    top: 0;
+    left: 60px;
+    z-index: 1;
+    background-color: #03314b;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+}
+
+.header-izquierda {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+header h1, header h2 {
+    color: white;
+    margin: 0;
+}
+
+header h1 {
+    font-size: 22px;
+    margin: 0;
+}
+
+.logo {
+    width: 60px;
+}
+
+.perfil-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.rol-usuario {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: white;
+    font-weight: bold;
+    margin-top: 3px;
+    text-align: center;
+}
+
+.icono-perfil {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    transition: transform 0.2s;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+@media screen and (max-width: 600px) {
+    .barra {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px 0;
+    }
+
+    .barra a {
+        float: none;
+        padding: 10px;
+        text-align: center;
+        width: auto;
+    }
+
+    .cuerpo {
+        margin-left: 0;
+    }
+}
+
+.div-container {
+    margin-top: 10px;
+}
+ 
+.cerrar_sesion {
+    display: none; /* Ocultar el botón por defecto */
+    margin-top: auto;
+    margin-bottom: 20px;
+    padding: 0 15px;
+    white-space: nowrap;
+}
+
+.barra:hover .cerrar_sesion {
+    display: block; /* Mostrar el botón cuando la barra esté en hover */
+}
+
+.btn-cerrar-sesion {
+    background-color: rgb(4, 55, 77);
+    color: white;
+    padding: 10px 20px; /* Ajustar el padding */
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%; /* Hacer que el botón ocupe el ancho completo */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-cerrar-sesion:hover {
+    background-color: rgb(5, 35, 48);
+}
+
+/* Modal de perfil */
+.modal-perfil {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    overflow: auto;
+}
+
+.modal-contenido {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.cerrar-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar-modal:hover {
+    color: #000;
+}
+
+.columna-izquierda {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.columna-derecha {
+    flex: 1;
+}
+
+.Datos {
+    display: flex;
+    gap: 20px;
+}
+
+.Foto img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.Foto img:hover {
+    transform: scale(1.05);
+}
+
+input[type="file"] {
+    margin-top: 15px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button[type="submit"] {
+    background-color: #03314b;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #022536;
+}
+
+.columna-derecha p {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.bienvenida {
+    margin-top: 80px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.bienvenida h3 {
+    font-size: 24px;
+    color: #03314b;
+    margin-bottom: 10px;
+}
+
+.bienvenida p {
+    font-size: 16px;
+    color: #555;
+}
+
+strong {
+    font-weight: bold;
+}
+
+.selection.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #2196f3;
+}

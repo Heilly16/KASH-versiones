@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Aprendiz - Asistencia</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/aprendiz/asistencia.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+ // Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+ // Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/aprendiz/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/aprendiz/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/aprendiz/prueba}" class="link">Pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${aprendiz.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/aprendiz/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAprendiz/{id}(id=${aprendiz.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${aprendiz.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${aprendiz.nombres} + ' ' + ${aprendiz.primerA} + ' ' + ${aprendiz.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${aprendiz.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${aprendiz.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${aprendiz.numero}"></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+            <div class="titulo-container">
+                <h3 class="titulo-asistencia">Mis asistencias</h3>
+                <hr class="linea-divisora">
+                <div class="formulario-busqueda">
+                    <form th:action="@{/aprendiz/asistencia}" method="get">
+                        <span class="texto-busqueda">Buscar día:</span>
+                        <input type="date" name="fecha" id="fechaInput" onchange="form.submit()" />
+
+                    </form>
+                </div>
+
+            </div>
+            <div class="Asistencia">
+                <table>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asesoría</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="asistencia : ${asistencias}">
+                                <td th:text="${asistencia.asesoria.grupo.nombre}">Nombre de asesoría</td>
+                                <td th:text="${#temporals.format(asistencia.fecha, 'EEEE d MMMM', T(java.util.Locale).forLanguageTag('es'))}"></td>
+                                <td th:text="${asistencia.asistio ? 'Presente' : 'Ausente'}">Estado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+                </table>
+            </div>
+            <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+            <script src="../../js/help-modal.js"></script>
+            <script src="../../js/add-help-modal.js"></script>
+            <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                // Configuración del modal de ayuda
+                                addHelpModal('Ayuda - Asistencia', [
+                                    {title: 'Registro', description: 'Visualice su registro de asistencia a las diferentes asesorías.'},
+                                    {title: 'Estado', description: 'Consulte el estado de asistencia de cada sesión (Presente/Ausente).'},
+                                    {title: 'Filtrado', description: 'Vea su histórico de asistencias organizado por grupos.'}
+                                ], 'La asistencia es registrada por su asesor al finalizar cada asesoría programada.');
+
+                                // Resto del código específico de la página
+                                function abrirModalPerfil() {
+                                    document.getElementById('modalPerfil').style.display = 'block';
+                                }
+
+                                function cerrarModalPerfil() {
+                                    document.getElementById('modalPerfil').style.display = 'none';
+                                }
+
+                                // Cerrar modal al hacer clic fuera
+                                window.onclick = function (event) {
+                                    var modalPerfil = document.getElementById('modalPerfil');
+                                    if (modalPerfil && event.target === modalPerfil) {
+                                        cerrarModalPerfil();
+                                    }
+                                };
+                            });
+            </script>
+
+        </div>
+    </body>
+</html>

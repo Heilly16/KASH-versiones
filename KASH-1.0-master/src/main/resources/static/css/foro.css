@@ -1,0 +1,567 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    background-color: #f0f0f0;
+    font-family: 'Nunito', sans-serif;
+}
+/*Header de la pagina*/
+header {
+    background-color: #03314b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    color: white;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+header .logo {
+    width: 50px;
+}
+
+header h1, header h2 {
+    color: white;
+    margin: 0;
+}
+.btn-login {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-login:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+main {
+    padding: 20px;
+}
+
+/*Foros de la pagina*/
+
+#foros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;;
+    padding: 20px;
+}
+
+.foro-item {
+    width: 300px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.foro-item:hover {
+    transform: scale(1.05);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+}
+
+.card-header {
+    width: 100%;
+}
+
+.card-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.card-body {
+    margin-top: 10px;
+}
+
+.card-footer {
+    margin-top: 10px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Estilos para el modal del foro */
+#modalForo {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    overflow-y: auto; /* Permite scroll vertical */
+}
+#modalForo .modal-img {
+    width: 100%; /* Ajusta el ancho máximo */
+    max-width: 500px; /* Define un tamaño máximo más grande */
+    height: auto; /* Mantiene la proporción */
+    display: block; /* Evita problemas de alineación */
+    margin: 0 auto 20px; /* Centra la imagen en el modal */
+    border-radius: 10px; /* Bordes redondeados para mejor estética */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Efecto de sombra suave */
+}
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 70%;
+    max-width: 800px;
+    max-height: 85vh; /* Altura máxima relativa a la ventana */
+    overflow-y: auto; /* Permite scroll vertical dentro del modal */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    text-align: left;
+    animation: fadeIn 0.4s ease-out;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 20px auto; /* Agrega margen para que no quede pegado a los bordes */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -55%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+#modalTema {
+    font-size: 28px; /* Aumentamos el tamaño de la fuente */
+    font-weight: bold;
+    color: #03314b; /* Color del texto más atractivo */
+    margin-bottom: 15px; /* Espacio debajo del título */
+    border-bottom: 2px solid #03314b;
+    padding-bottom: 10px;
+}
+
+#modalAutor,
+#modalFecha {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #555; /* Color más suave para los detalles */
+    display: inline-block;
+    background-color: #f8f9fa;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 15px;
+}
+
+#modalContenido {
+    font-size: 16px;
+    line-height: 1.6; /* Mejor legibilidad */
+    color: #333;
+    margin: 25px 0;
+    text-align: justify; /* Mejor alineación del contenido */
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #03314b;
+}
+
+#btnComentar {
+    display: block;
+    margin-left: auto; /* Empuja el botón a la derecha */
+    padding: 10px 20px;
+    background-color: #007bff; /* Color azul */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#btnComentar:hover {
+    background-color: #0056b3; /* Color más oscuro al pasar el mouse */
+}
+
+/* Oculta el textarea de comentarios */
+#comentarioText {
+    display: none;
+}
+
+
+#comentariosZona {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 2px solid #ddd;
+}
+
+#comentariosZona h4 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #03314b;
+    position: relative;
+    padding-left: 10px;
+}
+
+#comentariosZona h4::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: #03314b;
+    border-radius: 4px;
+}
+
+#comentariosZona p {
+    background-color: #f1f1f1;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-comentar {
+    margin-top: 25px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.input-comentar {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #fff;
+    margin-bottom: 12px; /* Separación entre los campos */
+    transition: all 0.3s ease;
+}
+
+.input-comentar:focus {
+    border-color: #03314b; /* Cambio de borde cuando está en foco */
+    outline: none;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 8px rgba(3, 49, 75, 0.2);
+}
+
+.BotonComentar {
+    display: block;
+    margin-left: auto;
+    padding: 12px 25px; 
+    background-color: #03314b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+}
+
+.BotonComentar:hover {
+    background-color: #024567;
+    transform: translateY(-2px);
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px; /* Aumento del tamaño de la 'X' */
+    cursor: pointer;
+    color: #03314b;
+    transition: color 0.3s, transform 0.2s;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 50%;
+}
+
+.close:hover {
+    color: #ff6b6b; /* Color de la 'X' cambia al pasar el ratón */
+    transform: scale(1.1);
+}
+
+/*Comentar Foto*/
+#comentarioModal {
+    display: none; /* Asegúrate de que el modal esté oculto por defecto */
+}
+ /*Botones flotantes*/
+ /* Estilos para los botones flotantes */
+.btn-flotante, .btn-flotante2 {
+    position: fixed;
+    bottom: 20px;
+    background-color: rgb(4, 50, 77);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+.btn-flotante {
+    right: 20px; /* A la derecha */
+}
+
+.btn-flotante2 {
+    left: 20px; /* A la izquierda */
+}
+
+.btn-flotante img, .btn-flotante2 img {
+    width: 24px;
+    height: 24px;
+}
+
+.btn-flotante:hover, .btn-flotante2:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+/*formulario ingreso*/
+/* FORMULARIO (dentro del modal) */
+.formulario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%; /* Cambiado de 100% a 80% para mejor ajuste */
+    max-width: 700px; /* Aumentado de 600px a 700px */
+    padding: 25px; /* Más espacio interno */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: white;
+}
+
+.formulario h2 {
+    color: #03314b;
+    margin-bottom: 20px;
+    font-size: 24px; /* Aumentado el tamaño */
+    font-weight: bold;
+}
+
+/* Inputs dentro del formulario */
+.modal-content .formulario label {
+    align-self: flex-start; /* Asegura alineación a la izquierda */
+    font-weight: bold;
+    color: #03314b;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.modal-content .formulario input {
+    width: 100%;
+    padding: 14px; /* Más espacio */
+    border: 2px solid #038C3E;
+    outline: none;
+    font-size: 16px;
+    box-shadow: 0 0 5px rgba(3, 140, 62, 0.5);
+}
+
+/* MODAL DE LOGIN - ÚNICO */
+#loginModalUnique {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* MODAL: Contenido del modal */
+#loginModalUnique .modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 80%; /* Aumentado para ocupar más espacio */
+    max-width: 700px; /* Aumentado de 600px a 700px */
+    text-align: center;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* BOTÓN DE CERRAR */
+#loginModalUnique .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s;
+}
+
+#loginModalUnique .close:hover {
+    color: #ff0000;
+}
+
+/* BOTÓN DE INGRESAR */
+.formulario button {
+    padding: 14px 28px; /* Botón más grande */
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px; /* Letra más grande */
+    font-weight: bold;
+    width: 100%;
+    max-width: 250px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin: 10px;
+}
+
+.formulario button:hover {
+    background: linear-gradient(135deg, #0056b3, #00408b);
+    transform: scale(1.05);
+}
+
+.formulario button:active {
+    transform: scale(0.98);
+}
+
+/* Estilos para los enlaces dentro del formulario */
+.formulario .enlaces {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.formulario .enlaces a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.formulario .enlaces a:hover {
+    color: #0056b3;
+}
+
+
+/*Formulario pqrs*/
+
+
+/* Estilos para el formulario PQR */
+.formulario-pqr {
+   display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.formulario-pqr form {
+    display: flex;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.formulario-pqr form img {
+    width: 50px;
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.formulario-pqr form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.formulario-pqr input, .formulario-pqr textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.formulario-pqr textarea {
+    resize: vertical;
+}
+
+.formulario-pqr .button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.formulario-pqr button {
+    background-color: rgb(57, 169, 0);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.formulario-pqr button:hover {
+    background-color: rgb(45, 142, 0);
+    transform: scale(1.05);
+}
+
+#cerrarPQR {
+    background-color: #e74c3c;
+}
+
+#cerrarPQR:hover {
+    background-color: #c0392b;
+}
+ /*Modal en genera*/
+ .modal{
+     display: none;
+ }

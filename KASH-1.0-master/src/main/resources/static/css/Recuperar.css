@@ -1,0 +1,215 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    background-color: #03314b;
+    color: white;
+    height: 60px;
+}
+
+header .logo {
+    display: flex;
+    align-items: center;
+}
+
+header .logo img {
+    width: 60px;
+    margin-right: 10px;
+}
+
+.btn-foro {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-foro:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+.btn-registra {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-registra:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+nav {
+    display: flex;
+}
+
+nav li {
+    list-style: none;
+    margin-left: 20px;
+}
+
+nav li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+nav li a:hover {
+    color: #038C3E;
+}
+
+
+.btn-volver {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-volcer:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+/* Ajuste en el botón de ingresar */
+button {
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+button:hover {
+     background: linear-gradient(45deg, #218838, #0056b3);
+}
+
+button:active {
+    transform: scale(0.98);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h2 {
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+#correoForm, #codigoForm, #passwordForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 5px 0;
+    background-color: #03314b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.footer_nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.footer_nav img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin: 0 20px;
+}
+
+/* Ajustes para logos */
+.logo1 {
+    width: 150px !important;
+    height: 40px !important;
+    margin-right: 500px;
+}
+
+.logo2 {
+    width: 110px !important;
+    height: 50px !important;
+    margin-right: 500px;
+}
+
+.logo3 {
+    width: 90px !important;
+    height: 50px !important;
+}
+
+

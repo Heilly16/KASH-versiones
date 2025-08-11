@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>KASH - Iniciar Sesión</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="../css/principal2.css">
+    </head>
+    <body>
+
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <img class="logo" src="../img/logoKash.png" alt="Logo de KASH">
+                <h1>KASH</h1>
+            </div>
+            <nav>
+                <li><a th:href="@{/foro}" class="btn-foro">Ir a foro</a></li>
+                <li><a th:href="@{/registrar}" class="btn-registra">Registrar Usuario</a></li>
+            </nav>
+        </header>
+
+
+        <!-- Mensaje de error -->
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+
+        <main class="contenedor">
+            <section class="info">
+                <div class="flip-card">
+                    <div class="flip-card-inner" th:classappend="${mensajeError != null} ? 'rotar' : ''">
+
+                        <!-- Lado Frontal -->
+                        <div class="flip-card-front">
+                            <h1>Bienvenido a KASH</h1>
+                            <p>Tu plataforma de asesorías y gestión académica en el SENA.</p>
+                            <button class="btn-foro" id="mostrarFormulario">Iniciar Sesión</button>
+                        </div>
+
+                        <!-- Lado Trasero (Formulario) -->
+                        <div class="flip-card-back">
+                            <form id="formulario" th:action="@{/ingresar}" method="GET" class="formulario">
+                                <span id="cerrarFormulario" class="cerrar">X</span> 
+                                <h2>Iniciar sesión</h2>
+                                <p class="error-msg" th:if="${mensajeError}" th:text="${mensajeError}" style="color: red; display: block;"></p>
+
+                                <label for="usuario">Usuario:</label>
+                                <input type="text" id="usuario" name="usuario" placeholder="Ingrese su usuario">
+
+                                <label for="pass">Contraseña:</label>
+                                <input type="password" id="pass" name="pass" placeholder="Ingrese su contraseña">
+                                <i class="fa-solid fa-eye" id="togglePassword"></i>
+
+                                <button type="submit" class="btn-foro">Ingresar</button>
+                                <a th:href="@{/recuperacion/contrasena}" class="link">Olvidé mi contraseña</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Carrusel dentro de una card -->
+            <section class="carrusel-card">
+                <div class="carrusel">
+                    <ul>
+                        <li><img src="../img/sena1.jpg" alt=""></li>
+                        <li><img src="../img/sena2.jpg" alt=""></li>
+                        <li><img src="../img/sena3.jpg" alt=""></li>
+                        <li><img src="../img/sena4.png" alt=""></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer_nav">
+                <img class="logo1" src="../img/gov.co.png" alt="Logo Gov.co">
+                <img class="logo2" src="../img/cpdlv.png" alt="Logo CPDLV">
+                <img class="logo3" src="../img/logoSena.png" alt="Logo Sena">
+            </div>
+        </footer>
+
+        <script>
+            document.getElementById("mostrarFormulario").addEventListener("click", function () {
+                document.querySelector(".flip-card-inner").classList.add("rotar");
+            });
+            document.getElementById("cerrarFormulario").addEventListener("click", function () {
+                document.querySelector(".flip-card-inner").classList.remove("rotar");
+            });
+        </script>
+        <script>
+            document.getElementById("login-form").addEventListener("submit", function (event) {
+                event.preventDefault();
+                let usuario = document.getElementById("usuario").value;
+                let password = document.getElementById("pass").value;
+                if (usuario !== "admin" || password !== "1234") {
+                    document.getElementById("mensaje-error").style.display = "block";
+                } else {
+                    document.getElementById("mensaje-error").style.display = "none";
+                    alert("Inicio de sesión exitoso");
+                }
+            });
+        </script>
+        <script>
+            document.getElementById("mostrarFormulario").addEventListener("click", function () {
+                document.querySelector(".card").classList.add("girar");
+            });
+            // Función para cerrar el formulario
+            document.getElementById("cerrarFormulario").addEventListener("click", function () {
+                document.querySelector(".card").classList.remove("girar");
+            });
+        </script>
+        <script>
+            function togglePassword() {
+                var passwordField = document.getElementById("pass");
+                if (passwordField.type === "password") {
+                    passwordField.type = "text";
+                } else {
+                    passwordField.type = "password";
+                }
+            }
+        </script>  
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let successMessage = "[[${success}]]";
+                let errorMessage = "[[${error}]]";
+
+                if (successMessage && successMessage !== "null") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: successMessage,
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+
+                if (errorMessage && errorMessage !== "null") {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '¡Error!',
+                        text: errorMessage,
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            });
+        </script>
+
+
+
+
+
+
+
+    </body>
+</html>

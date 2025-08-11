@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Coordinador - Gestión de Componentes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/componentes.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>GESTIÓN DE COMPONENTES</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="contenido">
+                <!-- Mensajes de éxito y error -->
+                <div th:if="${mensaje}" class="mensaje-exito">
+                    <p th:text="${mensaje}"></p>
+                </div>
+                <div th:if="${error}" class="mensaje-error">
+                    <p th:text="${error}"></p>
+                </div>
+
+                <!-- Formulario para crear componentes -->
+                <div class="crear-componente">
+                    <h3>Crear nuevo componente</h3>
+                    <form th:action="@{/coordinador/componentes/crear}" method="post" id="formCrearComponente">
+                        <div class="form-group">
+                            <label for="nombreComponente">Nombre del componente:</label>
+                            <input type="text" id="nombreComponente" name="nombreComponente" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo de asignación de programas:</label>
+                            <div class="radio-group">
+                                <input type="radio" id="programaUnico" name="tipoProgramas" value="unico" checked>
+                                <label for="programaUnico">Un solo programa</label>
+
+                                <input type="radio" id="programasMultiples" name="tipoProgramas" value="multiple">
+                                <label for="programasMultiples">Varios programas</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="programaUnicoGroup">
+                            <label for="programa">Seleccionar programa:</label>
+                            <select id="programa" name="programa" class="select-single">
+                                <option value="">Seleccionar un programa</option>
+                                <option th:each="programa : ${programas}" th:value="${programa}" th:text="${programa}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="programasMultiplesGroup" style="display: none;">
+                            <label for="programas">Seleccionar programas:</label>
+                            <select id="programas" name="programas" multiple class="select-multiple">
+                                <option th:each="programa : ${programas}" th:value="${programa}" th:text="${programa}"></option>
+                            </select>
+                            <small>Mantén presionada la tecla Ctrl para seleccionar múltiples programas</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nuevoPrograma">O crear nuevo programa:</label>
+                            <input type="text" id="nuevoPrograma" name="nuevoPrograma" placeholder="Nombre del nuevo programa">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="implementarProgramas">
+                                <input type="checkbox" id="implementarProgramas" name="implementarProgramas" value="true">
+                                Implementar este componente a los programas seleccionados
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-crear">
+                            <i class="fas fa-plus"></i> Crear componente
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista de componentes existentes -->
+                <div class="lista-componentes">
+                    <h3>Componentes disponibles</h3>
+
+                    <!-- Filtros de búsqueda -->
+                    <div class="filtros-container">
+                        <h4>Buscar componente</h4>
+                        <form th:action="@{/coordinador/componentes/buscar}" method="get" class="formulario-filtros">
+                            <div class="filtro-grupo">
+                                <label for="nombreComponenteFilter">Nombre del componente:</label>
+                                <input type="text" id="nombreComponenteFilter" name="nombreComponente" placeholder="Nombre del componente">
+                            </div>
+
+                            <button type="submit" class="btn-filtrar">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="tabla-container">
+                        <table class="tabla-componentes">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del componente</th>
+                                    <th>Número de grupos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="componente : ${componentesDisponibles}">
+                                    <td th:text="${componente}"></td>
+                                    <td th:text="${gruposPorComponente.get(componente)}"></td>
+                                </tr>
+                                <tr th:if="${componentesDisponibles.isEmpty()}">
+                                    <td colspan="2" class="no-resultados">No hay componentes registrados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resultados de búsqueda -->
+                    <div th:if="${usuariosFiltrados != null}" class="resultados-busqueda">
+                        <h4>Resultados de la búsqueda</h4>
+                        <table class="tabla-usuarios">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                    <th>Grupo</th>
+                                    <th>Correo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="usuario : ${usuariosFiltrados}">
+                                    <td th:text="${usuario.idUsuario}"></td>
+                                    <td th:text="${usuario.nombres} + ' ' + ${usuario.primerA}"></td>
+                                    <td th:text="${usuario.rolSeleccionado}"></td>
+                                    <td th:text="${usuario.grupoNombre}"></td>
+                                    <td th:text="${usuario.correo}"></td>
+                                </tr>
+                                <tr th:if="${usuariosFiltrados.isEmpty()}">
+                                    <td colspan="5" class="no-resultados">No se encontraron usuarios</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de perfil -->
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+                <!-- Contenido del modal de perfil -->
+            </div>
+        </div>
+
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Gestión de Componentes</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar los componentes disponibles en la plataforma. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Crear componentes:</strong> Puede crear nuevos componentes para que los usuarios se unan a grupos.</li>
+                    <li><strong>Asignar programas:</strong> Asigne uno o varios programas a cada componente.</li>
+                    <li><strong>Crear programas:</strong> Si no existe un programa, puede crear uno nuevo.</li>
+                    <li><strong>Ver componentes:</strong> Observe todos los componentes existentes y el número de grupos que contiene cada uno.</li>
+                </ul>
+                <p>Los componentes son las áreas temáticas en las que los asesores pueden crear grupos para impartir asesorías.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <script>
+            function abrirModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'block';
+            }
+
+            function cerrarModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'none';
+            }
+
+            // Script para manejar la selección de tipo de programas
+            document.addEventListener('DOMContentLoaded', function () {
+                const programaUnicoRadio = document.getElementById('programaUnico');
+                const programasMultiplesRadio = document.getElementById('programasMultiples');
+                const programaUnicoGroup = document.getElementById('programaUnicoGroup');
+                const programasMultiplesGroup = document.getElementById('programasMultiplesGroup');
+                const programaSelect = document.getElementById('programa');
+                const programasSelect = document.getElementById('programas');
+                const implementarCheckbox = document.getElementById('implementarProgramas');
+                const form = document.getElementById('formCrearComponente');
+
+                // Función para alternar la visibilidad de los selectores
+                function toggleProgramaSelectors() {
+                    if (programaUnicoRadio.checked) {
+                        programaUnicoGroup.style.display = 'block';
+                        programasMultiplesGroup.style.display = 'none';
+                        // Limpiar la selección múltiple
+                        Array.from(programasSelect.options).forEach(option => option.selected = false);
+                    } else {
+                        programaUnicoGroup.style.display = 'none';
+                        programasMultiplesGroup.style.display = 'block';
+                        // Limpiar la selección única
+                        programaSelect.value = '';
+                    }
+                }
+
+                // Asignar eventos
+                programaUnicoRadio.addEventListener('change', toggleProgramaSelectors);
+                programasMultiplesRadio.addEventListener('change', toggleProgramaSelectors);
+
+                // Validación del formulario
+                form.addEventListener('submit', function (event) {
+                    const nombreComponente = document.getElementById('nombreComponente').value.trim();
+                    const nuevoPrograma = document.getElementById('nuevoPrograma').value.trim();
+                    let hasPrograma = false;
+
+                    // Verificar si se ha seleccionado un programa o se ha ingresado uno nuevo
+                    if (programaUnicoRadio.checked) {
+                        hasPrograma = programaSelect.value !== '';
+                    } else {
+                        hasPrograma = Array.from(programasSelect.options).some(option => option.selected);
+                    }
+
+                    if (!nombreComponente) {
+                        alert('Por favor, ingrese un nombre para el componente.');
+                        event.preventDefault();
+                        return;
+                    }
+
+                    if (!hasPrograma && !nuevoPrograma) {
+                        alert('Por favor, seleccione un programa existente o cree uno nuevo.');
+                        event.preventDefault();
+                        return;
+                    }
+
+                    // Si se seleccionó implementar pero no hay programas seleccionados
+                    if (implementarCheckbox.checked && !hasPrograma && !nuevoPrograma) {
+                        alert('Para implementar el componente, debe seleccionar al menos un programa.');
+                        event.preventDefault();
+                        return;
+                    }
+
+                    // Confirmar la implementación si está marcada la casilla
+                    if (implementarCheckbox.checked) {
+                        let programasTexto = '';
+
+                        if (programaUnicoRadio.checked && programaSelect.value) {
+                            programasTexto = programaSelect.options[programaSelect.selectedIndex].text;
+                        } else if (programasMultiplesRadio.checked) {
+                            const selectedPrograms = Array.from(programasSelect.options)
+                                    .filter(option => option.selected)
+                                    .map(option => option.text);
+                            programasTexto = selectedPrograms.join(', ');
+                        }
+
+                        if (nuevoPrograma) {
+                            if (programasTexto) {
+                                programasTexto += ', ' + nuevoPrograma;
+                            } else {
+                                programasTexto = nuevoPrograma;
+                            }
+                        }
+
+                        if (!confirm(`¿Desea implementar el componente "${nombreComponente}" a los siguientes programas: ${programasTexto}?`)) {
+                            event.preventDefault();
+                        }
+                    }
+                });
+            });
+        </script>
+
+        <script src="../../js/help-modal.js"></script>
+    </body>
+</html> 

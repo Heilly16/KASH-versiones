@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>COORDINADOR USUARIOS</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/usuarios.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+ // Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+ // Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>CONTROL DE USUARIOS</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="modalPerfil" class="modal-perfil" style="display:none;">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/coordinador/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{|/fotoCoordinador/${coordinador.idUsuario}|}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${coordinador.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${coordinador.nombres} + ' ' + ${coordinador.primerA} + ' ' + ${coordinador.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${coordinador.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${coordinador.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${coordinador.rolSeleccionado}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${coordinador.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${coordinador.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${coordinador.numero}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="usuarios">
+                <h2 class="titulo">Lista de usuarios</h2>
+
+                <!-- Filtros avanzados -->
+                <div class="filtros-container">
+                    <form th:action="@{/coordinador/buscar}" method="get" class="filtros-form">
+                        <div class="filtros-grupo">
+                            <div class="filtro">
+                                <label for="filtro">Buscar:</label>
+                                <input type="text" id="filtro" name="filtro" placeholder="Buscar usuario" th:value="${filtro}" class="filtro-input">
+                            </div>
+                            <div class="filtro">
+                                <label for="rol">Rol:</label>
+                                <select id="rol" name="rol" class="filtro-select">
+                                    <option value="todos" th:selected="${rol == null || rol == 'todos'}">Todos</option>
+                                    <option value="Aprendiz" th:selected="${rol == 'Aprendiz'}">Aprendiz</option>
+                                    <option value="Asesor" th:selected="${rol == 'Asesor'}">Asesor</option>
+                                    <option value="Coordinador" th:selected="${rol == 'Coordinador'}">Coordinador</option>
+                                </select>
+                            </div>
+                            <div class="filtro">
+                                <label for="trimestre">Trimestre:</label>
+                                <select id="trimestre" name="trimestre" class="filtro-select">
+                                    <option value="todos" th:selected="${trimestre == null || trimestre == 'todos'}">Todos</option>
+                                    <option th:each="t : ${trimestres}" th:value="${t}" th:text="${t}" th:selected="${trimestre == t}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filtros-botones">
+                            <button type="submit" class="btn-filtrar">
+                                <i class="fas fa-filter"></i> Aplicar filtros
+                            </button>
+                            <button type="button" onclick="limpiarFiltros()" class="btn-limpiar">
+                                <i class="fas fa-broom"></i> Limpiar filtros
+                            </button>
+                        </div>
+                    </form>
+                    <div class="formulario-csv">
+                        <form th:action="@{/coordinador/subir-csv}" method="post" enctype="multipart/form-data">
+                            <input type="file" name="archivo" accept=".csv" required>
+                            <button type="submit" class="btn-subir-csv">Subir archivo</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="reporte-botones">
+                        <button class="btn-generar-reporte" onclick="abrirModal()">
+                            <i class="fas fa-file-pdf"></i> Generar reporte personalizado
+                        </button>
+                        <th:block th:if="${usuarios.size() == 1}">
+                            <a th:href="@{/coordinador/reporte-usuario-individual(id=${usuarios[0].idUsuario})}" target="_blank" class="btn-generar-reporte">
+                                <i class="fas fa-user-chart"></i> Descargar Reporte Individual
+                            </a>
+                        </th:block>
+                    </div>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Número de documento:</th>
+                                <th>Rol</th>
+                                <th>Nombre</th>
+                                <th>Primer Apellido</th>
+                                <th>Segundo Apellido</th>
+                                <th>Programa</th>
+                                <th>Estado</th>
+                                <th>Trimestre</th>
+                                <th>Correo</th>
+                                <th>Número</th>
+                                <th>Usuario</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${usuarios}">
+                                <td th:text="${u.idUsuario}"></td>
+                                <td th:text="${u.rolSeleccionado}"></td>
+                                <td th:text="${u.nombres}"></td>
+                                <td th:text="${u.primerA}"></td>
+                                <td th:text="${u.segundoA}"></td>
+                                <td th:text="${u.programa != null ? u.programa : 'No asignado'}"></td>
+                                <td th:text="${u.estado != null ? u.estado : 'Activo'}" th:class="${u.estado != null && u.estado == 'Inactivo' ? 'estado-inactivo' : 'estado-activo'}"></td>
+                                <td th:text="${u.trimestre}"></td>
+                                <td th:text="${u.correo}"></td>
+                                <td th:text="${u.numero}"></td>
+                                <td th:text="${u.usuario}"></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a th:href="@{/coordinador/editar/{id}(id=${u.idUsuario})}" class="btn-editar">Editar</a>
+                                        <button type="button" class="btn-inactivar" th:attr="data-id=${u.idUsuario}, data-nombre=${u.nombres + ' ' + u.primerA}" onclick="abrirModalInactivar(this)">
+                                            <span th:if="${u.estado == null || u.estado != 'Inactivo'}">Inactivar</span>
+                                            <span th:if="${u.estado != null && u.estado == 'Inactivo'}">Activar</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="modalReporte" class="modal" style="display:none;">
+            <div class="modal-content">
+                <h3>Selecciona los campos que deseas incluir:</h3>
+                <form id="formReportePersonalizado" method="post" th:action="@{/coordinador/generar-reporte-personalizado}" target="_blank">
+
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="campos" value="idUsuario" checked> Número de documento</label>
+                        <label><input type="checkbox" name="campos" value="rolSeleccionado" checked> Rol</label>
+                        <label><input type="checkbox" name="campos" value="nombres" checked> Nombre</label>
+                        <label><input type="checkbox" name="campos" value="primerA" checked> Primer Apellido</label>
+                        <label><input type="checkbox" name="campos" value="segundoA" checked> Segundo Apellido</label>
+                        <label><input type="checkbox" name="campos" value="fNacimiento" checked> Fecha de Nacimiento</label>
+                        <label><input type="checkbox" name="campos" value="tDocumento" checked> Tipo de Documento</label>
+                        <label><input type="checkbox" name="campos" value="trimestre" checked> Trimestre</label>
+                        <label><input type="checkbox" name="campos" value="correo" checked> Correo</label>
+                        <label><input type="checkbox" name="campos" value="numero" checked> Número</label>
+                        <label><input type="checkbox" name="campos" value="usuario" checked> Usuario</label>
+                    </div>
+                    <div class="tipo-reporte">
+                        <label><input type="radio" name="tipo" value="pdf" checked> PDF</label>
+                        <label><input type="radio" name="tipo" value="excel"> Excel</label>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-generar-reporte">Generar</button>
+                        <button type="button" onclick="cerrarModal()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Control de Usuarios</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar todos los usuarios del sistema. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Filtros:</strong> Puede buscar usuarios por texto, filtrar por rol (Aprendiz, Asesor, Coordinador) o por trimestre.</li>
+                    <li><strong>Reportes:</strong> Genere reportes personalizados en PDF  con la información de los usuarios.</li>
+                    <li><strong>Importar usuarios:</strong> Puede cargar usuarios masivamente mediante un archivo CSV.</li>
+                    <li><strong>Acciones:</strong> Para cada usuario puede editar su información o eliminarlo del sistema.</li>
+                </ul>
+                <p>Para obtener más información sobre cada función, pase el cursor sobre los botones o elementos de la interfaz.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <!-- Modal para inactivar usuario -->
+        <div id="modalInactivar" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="cerrar-modal" onclick="cerrarModalInactivar()">&times;</span>
+                <h3 class="modal-title"><i class="fas fa-user-slash"></i> <span id="tituloModalInactivar">Inactivar usuario</span></h3>
+
+                <form id="formInactivar" method="post" th:action="@{/coordinador/inactivar-usuario}">
+                    <input type="hidden" id="usuarioIdInactivar" name="idUsuario">
+                    <input type="hidden" id="accionTipo" name="accion" value="inactivar">
+
+                    <p id="mensajeConfirmacion">¿Estás seguro de que deseas inactivar a este usuario?</p>
+
+                    <div class="form-group">
+                        <label for="motivoInactivacion">Motivo:</label>
+                        <textarea id="motivoInactivacion" name="motivo" rows="4" placeholder="Escribe el motivo de la inactivación..." required></textarea>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-confirmar">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalInactivar()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function abrirModal() {
+                document.getElementById('modalReporte').style.display = 'flex';
+            }
+
+            function cerrarModal() {
+                document.getElementById('modalReporte').style.display = 'none';
+            }
+
+            function abrirModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'block';
+            }
+
+            function cerrarModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'none';
+            }
+
+            function limpiarFiltros() {
+                document.getElementById('filtro').value = '';
+                document.getElementById('rol').value = 'todos';
+                document.getElementById('trimestre').value = 'todos';
+                document.querySelector('.filtros-form').submit();
+            }
+
+            // Cerrar el modal al hacer clic fuera
+            window.onclick = function (event) {
+                const modalReporte = document.getElementById('modalReporte');
+                const modalPerfil = document.getElementById('modalPerfil');
+                const helpModal = document.getElementById('helpModal');
+                const modalInactivar = document.getElementById('modalInactivar');
+
+                if (event.target === modalReporte) {
+                    modalReporte.style.display = 'none';
+                }
+
+                if (event.target === modalPerfil) {
+                    modalPerfil.style.display = 'none';
+                }
+
+                if (event.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
+
+                if (event.target === modalInactivar) {
+                    modalInactivar.style.display = 'none';
+                }
+            }
+
+            function abrirModalInactivar(btn) {
+                const id = btn.getAttribute('data-id');
+                const nombre = btn.getAttribute('data-nombre');
+                const accion = btn.textContent.trim() === 'Inactivar' ? 'inactivar' : 'activar';
+
+                document.getElementById('usuarioIdInactivar').value = id;
+                document.getElementById('accionTipo').value = accion;
+
+                if (accion === 'inactivar') {
+                    document.getElementById('tituloModalInactivar').textContent = 'Inactivar usuario';
+                    document.getElementById('mensajeConfirmacion').textContent = `¿Estás seguro de que deseas inactivar al usuario ${nombre}?`;
+                    document.getElementById('motivoInactivacion').placeholder = 'Escribe el motivo de la inactivación...';
+                    document.getElementById('motivoInactivacion').required = true;
+                } else {
+                    document.getElementById('tituloModalInactivar').textContent = 'Activar usuario';
+                    document.getElementById('mensajeConfirmacion').textContent = `¿Estás seguro de que deseas activar al usuario ${nombre}?`;
+                    document.getElementById('motivoInactivacion').placeholder = 'Escribe el motivo de la activación (opcional)';
+                    document.getElementById('motivoInactivacion').required = false;
+                }
+
+                document.getElementById('modalInactivar').style.display = 'flex';
+            }
+
+            function cerrarModalInactivar() {
+                document.getElementById('modalInactivar').style.display = 'none';
+            }
+        </script>
+
+        <script src="../../js/help-modal.js"></script>
+
+    </body>
+</html>

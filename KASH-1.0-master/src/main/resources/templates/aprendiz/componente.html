@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Aprendiz - Componentes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/aprendiz/componentes.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+// Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+// Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection active">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/aprendiz/componente}" class="link">Solicitar componentes</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/aprendiz/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/aprendiz/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/aprendiz/prueba}" class="link">Pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${aprendiz.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/aprendiz/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAprendiz/{id}(id=${aprendiz.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${aprendiz.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${aprendiz.nombres} + ' ' + ${aprendiz.primerA} + ' ' + ${aprendiz.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${aprendiz.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${aprendiz.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${aprendiz.numero}"></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="componente">
+                <form method="get" th:action="@{/aprendiz/componente}" class="search-form">
+                    <div class="search-container">
+                        <input type="text" name="buscar" th:value="${buscar}" placeholder="Buscar componente...">
+                        <button type="submit">Buscar</button>
+                    </div>
+                </form>
+
+                <form method="post" th:action="@{/aprendiz/componente}">
+                    <h2>Solicitar Componente:</h2>
+                    <p>En este espacio puedes elegir los componentes a los cuales deseas hacer asesorías</p>
+
+                    <div class="form-inline">
+                        <select id="componenteSelect" name="componente" required>
+                            <option value="">-- Selecciona un componente --</option>
+                            <th:block th:each="componente : ${componentesDisponibles}">
+                                <option th:value="${componente}" th:text="${componente}"></option>
+                            </th:block>
+                        </select>
+
+                        <button type="submit">Registrar componente</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="componente2">
+                <h2>Componentes elegidos:</h2>
+                <div th:if="${mensaje}" class="alert alert-success">
+                    <p th:text="${mensaje}"></p>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger">
+                    <p th:text="${error}"></p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="componente : ${componentesElegidos}">
+                        <tr>
+                            <td th:text="${componente.nombre}"></td>
+                            <td>
+                                <form action="/aprendiz/eliminarComponente" method="post">
+                                    <input type="hidden" name="id" th:value="${componente.id}" />
+                                    <button type="submit" onclick="return confirm('¿Estás seguro de que quieres eliminar este componente? No se podrá eliminar si tiene asesorías activas.')">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+
+        </div>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            // Configuración del modal de ayuda
+                                            addHelpModal('Ayuda - Componentes', [
+                                                {title: 'Visualización', description: 'Vea todos los componentes disponibles para inscripción.'},
+                                                {title: 'Inscripción', description: 'Solicite inscripción a componentes de su interés.'},
+                                                {title: 'Estado', description: 'Verifique el estado de sus solicitudes de componentes.'}
+                                            ], 'Puede inscribirse en varios componentes y unirse a los grupos disponibles en cada uno de ellos.');
+
+                                            // Resto del código específico de la página
+                                            function abrirModalPerfil() {
+                                                document.getElementById('modalPerfil').style.display = 'block';
+                                            }
+
+                                            function cerrarModalPerfil() {
+                                                document.getElementById('modalPerfil').style.display = 'none';
+                                            }
+
+                                            // Cerrar modal de perfil al hacer clic fuera de él
+                                            window.onclick = function (event) {
+                                                var modalPerfil = document.getElementById('modalPerfil');
+                                                if (modalPerfil && event.target === modalPerfil) {
+                                                    cerrarModalPerfil();
+                                                }
+                                            };
+                                        });
+        </script>
+    </body>
+</html>

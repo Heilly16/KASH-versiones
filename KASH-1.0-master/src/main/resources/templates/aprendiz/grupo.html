@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+
+    <head>
+        <title>Aprendiz - Grupos</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/aprendiz/grupo.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script>
+            function verificarSesionActiva() {
+                fetch('/api/sesion-activa', {credentials: 'same-origin'})
+                        .then(response => {
+                            if (!response.ok) {
+                                window.location.href = '/index';
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = '/index';
+                        });
+            }
+
+ // Ejecutar al cargar la página normalmente
+            window.onload = verificarSesionActiva;
+
+ // Ejecutar también al volver con "Atrás" o "Adelante" (bfcache)
+            window.addEventListener('pageshow', function (event) {
+                verificarSesionActiva();
+            });
+        </script>
+    </head>
+
+    <body>
+
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/aprendiz/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/aprendiz/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/aprendiz/prueba}" class="link">Pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${aprendiz.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/aprendiz/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAprendiz/{id}(id=${aprendiz.idUsuario})}" alt="Foto de perfil" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${aprendiz.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${aprendiz.nombres} + ' ' + ${aprendiz.primerA} + ' ' + ${aprendiz.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${aprendiz.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${aprendiz.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${aprendiz.numero}"></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Botón para volver a ver todos los grupos si hay un filtro activo -->
+
+            <div class="contenedor-busqueda-volver">
+                
+            </div>
+
+            <!-- Mensaje de error o éxito -->
+            <div class="mensajes-container">
+                <div th:if="${error}" class="mensaje-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}">Mensaje de error</span>
+                </div>
+                <div th:if="${mensaje}" class="mensaje-exito">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${mensaje}">Mensaje de éxito</span>
+                </div>
+            </div>
+
+            <!-- Grupos Asignados -->
+            <div class="contenedor-grupos">
+                <h2 class="titulo-grupos">Grupos Asignados</h2>
+
+
+                <div th:if="${grupos != null and #lists.size(grupos) > 0}" class="grid-grupos">
+                    <div th:each="grupo : ${grupos}" class="card-grupo">
+                        <div th:if="${gruposConAsesoriaActiva.contains(grupo.idGrupo)}" class="notificacion-flotante">
+                            <i class="icono-notificacion"></i> Asesoría activa
+                        </div>
+
+                        <div class="card-header">
+                            <h3 th:text="${grupo.nombre}">Nombre del grupo</h3>
+                            <span class="estado" th:text="${grupo.estado}" th:classappend="${grupo.estado == 'Inactivo'} ? ' rojo' : ' verde'"></span>
+                        </div>
+
+                        <div class="card-body">
+                            <p><strong>Asesor:</strong> 
+                                <span th:if="${grupo.asesor != null}" th:text="${grupo.asesor.nombres}">Nombre del asesor</span>
+                                <span th:if="${grupo.asesor == null}">Sin asesor asignado</span>
+                            </p>
+                            <p><strong>Cantidad de integrantes:</strong> <span th:text="${#lists.size(grupo.aprendices)}">0</span></p>
+                            <div class="botones-card">
+                                <a class="btn-detalles" href="#" 
+                                   th:attr="data-integrantes=${#strings.listJoin(grupo.aprendices.?[usuario != null].![usuario.nombres], ',')}" 
+                                   onclick="mostrarDetalles(this)">
+                                    Ver detalles
+                                </a>
+                                <a class="btn-asesorias" href="/aprendiz/asesorias">Asesorías</a>
+
+                                <form th:action="@{/aprendiz/salirGrupo}" method="post" class="form-salir-grupo" onsubmit="return confirmarSalir(this)">
+                                    <input type="hidden" name="idGrupo" th:value="${grupo.idGrupo}" />
+                                    <button type="submit" class="btn-salir">Salir del grupo</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p th:unless="${grupos != null and #lists.size(grupos) > 0}">
+                    Grupos no disponibles
+                </p>
+            </div>
+
+            <!-- Modal de integrantes -->
+            <div id="modalIntegrantes" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="cerrarModalIntegrantes()">&times;</span>
+                    <h3>Integrantes del grupo</h3>
+                    <ul id="listaIntegrantes" class="detalles-integrantes"></ul>
+                </div>
+            </div>
+
+            <!-- Grupos Disponibles -->
+            <div class="contenedor-grupos">
+
+                <h2 class="titulo-grupos">Grupos a los que te puedes unir</h2>
+
+
+                <div th:if="${gruposDisponibles != null and #lists.size(gruposDisponibles) > 0}" class="grid-grupos">
+                    <div th:each="grupo : ${gruposDisponibles}" class="card-grupo">
+                        <div class="card-header">
+                            <h3 th:text="${grupo.nombre}">Nombre del grupo</h3>
+                            <span class="estado verde">Disponible</span>
+                        </div>
+
+                        <div class="card-body">
+                            <p><strong>Cantidad de integrantes:</strong> <span th:text="${grupo.cantidad}">0</span></p>
+
+                            <div class="botones-card">
+                                <a class="btn-detalles" href="#" 
+                                   th:attr="data-integrantes=${#strings.listJoin(grupo.aprendices.?[usuario != null].![usuario.nombres], ',')}" 
+                                   onclick="mostrarDetalles(this)">
+                                    Ver detalles
+                                </a>
+
+                                <form th:action="@{/aprendiz/entrarGrupo}" method="post" class="form-entrar-grupo" onsubmit="return confirmarIngreso(this)">
+                                    <input type="hidden" name="idGrupo" th:value="${grupo.idGrupo}" />
+                                    <button type="submit" class="btn-asesorias">Entrar al grupo</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p th:unless="${gruposDisponibles != null and #lists.size(gruposDisponibles) > 0}">
+                    No hay grupos disponibles
+                </p>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script>
+            function mostrarDetalles(boton) {
+                const nombres = boton.getAttribute("data-integrantes");
+                const listaIntegrantes = document.getElementById("listaIntegrantes");
+                listaIntegrantes.innerHTML = '';
+
+                if (nombres) {
+                    nombres.split(',').forEach(nombre => {
+                        const li = document.createElement('li');
+                        li.textContent = nombre.trim();
+                        listaIntegrantes.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = "Sin integrantes";
+                    listaIntegrantes.appendChild(li);
+                }
+
+                document.getElementById("modalIntegrantes").style.display = "block";
+            }
+
+            function cerrarModalIntegrantes() {
+                document.getElementById("modalIntegrantes").style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                const modal = document.getElementById("modalIntegrantes");
+                if (event.target === modal) {
+                    cerrarModalIntegrantes();
+                }
+            };
+
+            function confirmarIngreso(form) {
+                return confirm("¿Estás seguro de que deseas ingresar a este grupo?");
+            }
+
+            function confirmarSalir(form) {
+                return confirm("¿Estás seguro de que deseas salir de este grupo? Esta acción no se puede deshacer.");
+            }
+
+            function toggleFiltro(idFormulario) {
+                const formulario = document.getElementById(idFormulario);
+                formulario.style.display = (formulario.style.display === 'none' || formulario.style.display === '') ? 'flex' : 'none';
+            }
+        </script>
+        <script>
+            function abrirModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "block";
+            }
+
+            function cerrarModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "none";
+            }
+
+            // Cerrar el modal al hacer clic fuera de él
+            window.onclick = function (event) {
+                const modalPerfil = document.getElementById("modalPerfil");
+                if (event.target === modalPerfil) {
+                    cerrarModalPerfil();
+                }
+            };
+        </script>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Configuración del modal de ayuda
+                addHelpModal('Ayuda - Grupos', [
+                    {title: 'Visualización', description: 'Vea todos los grupos disponibles en los componentes a los que está inscrito.'},
+                    {title: 'Inscripción', description: 'Inscríbase en los grupos de su interés.'},
+                    {title: 'Estado', description: 'Consulte los grupos en los que ya está inscrito y sus detalles.'},
+                    {title: 'Detalles', description: 'Vea información detallada de cada grupo, como asesor, horarios y días.'}
+                ], 'Recuerde que puede inscribirse en varios grupos del mismo componente.');
+            });
+        </script>
+
+    </body>
+</html>
